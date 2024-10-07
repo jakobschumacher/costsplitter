@@ -1,0 +1,258 @@
+---
+title: "flat_money_transfer.Rmd for working package"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+# What's this about 
+Divide the costs of a group undertaking. If you go hiking with your friends the whole group has some costs that need to be divided. If you always share evenly the division can be unfair. What if somebody had to leave early? What if somebody only participated in some activities? What if somebody booked a seat but couldnt show up? What if there is a person who earns less and others would like to chip in? What if there were children who eat less than a full grown adult? This R package tries to balance these problems to have a fair distribution. Friendship is great and all the accounting should be smooth and unproblematic. 
+
+```{r development, include=FALSE}
+library(testthat)
+library(dplyr)
+library(tidyr)
+library(reader)
+```
+
+```{r development-dataset}
+# Run all this chunk in the console directly
+# There already is a dataset in the "inst/" directory
+# Make the dataset file available to the current Rmd during development
+pkgload::load_all(path = here::here(), export_all = FALSE)
+
+```
+
+
+# Function: Read in data
+The trick for a smooth and easy division of costs lies with they way the costs and the amount that people already paid are written down. 
+
+## The _participants.csv_ file
+Columns in the CSV File
+
+    prename: This column contains the first name of each person.
+        Example: "James", "Olivia"
+
+    surname: This column contains the last name of each person.
+        Example: "Smith", "Johnson"
+
+    group: This column represents the group that the person belongs to. It often matches the surname, which can imply that the group is a family or has some other common attribute.
+        Example: "Smith", "Johnson"
+
+    agegroup: This column shows whether the person is an adult or a kid. This helps categorize individuals based on their age for analysis.
+        Possible values: "adult", "kid"
+
+    age: This column contains the actual age of the person if available. Some rows may have missing values, which means the age was not recorded.
+        Example: "23", "14"
+
+    cost_dinnerday1: This column records the cost status for dinner on the first day. It has categories such as "full" or "reduced" to indicate the amount paid for dinner.
+        Possible values: "full", "reduced", or empty (meaning no dinner was recorded)
+
+    cost_day1, cost_day2, cost_day3: These columns indicate the cost status for each individual on Day 1, Day 2, and Day 3, respectively. The values can be "full" or "reduced", indicating whether the individual paid the full cost or a reduced rate.
+        Possible values: "full", "reduced", or empty
+
+    adjustment: This column shows if there was any adjustment made to the person's costs. It indicates if they received a discount or had some cost reduction on any day.
+        Possible values: "less" or empty (if no adjustment was made)
+
+
+```{r function-read_data}
+#' Read data for Grouptraveller
+#'
+#' @param path A file path (string) to an .csv file
+#'
+#' @return
+#' a data frame
+#' @export
+#'
+#' @examples
+read_data <- function(path = system.file("participants.csv", package = "Grouptraveller"),
+                      var_agegroup = "agegroup",
+                      value_adults = "adult",
+                      value_kids = "kid",
+                      indicator_costs = "cost",
+                      var_present = "present") {
+  
+   
+  # Define patterns for adults and kids in both English and German
+  adult_patterns <- tolower(c("adult", "adults", "erwachsene", "erwachsenen"))
+  kid_patterns <- tolower(c("kid", "kids", "kind", "kinder")) 
+
+  readr::read_csv(path, show_col_types = FALSE) |> 
+    janitor::clean_names() |> 
+    dplyr::rename(!!var_agegroup := agegroup) |>
+    dplyr::mutate(!!var_agegroup := dplyr::case_when(
+      tolower(!!dplyr::sym(var_agegroup)) %in% adult_patterns ~ value_adults,
+      tolower(!!dplyr::sym(var_agegroup)) %in% kid_patterns ~ value_kids,
+      TRUE ~ !!dplyr::sym(var_agegroup) # Keep the original value if it doesn't match
+    )) |> 
+    tidyr::pivot_longer(starts_with(indicator_costs), names_to = indicator_costs, values_to = var_present)
+}
+
+```
+
+
+```{r examples-read_data}
+df <- read_data(path = system.file("participants.csv", package = "Grouptraveller"))
+
+```
+
+```{r tests-read_data}
+# Test with your dataset in "inst/"
+df <- read_data(path = system.file("participants.csv", package = "Grouptraveller"))
+# Apply test on my function
+testthat::test_that("read_data works properly with internal dataset", {
+  testthat::expect_equal(nrow(read_data(system.file("participants.csv", package = "Grouptraveller"))), 124)
+})
+```
+
+
+# Helper functions
+We need some helper functions along the way.
+
+## Function to change the categorical values to numerical values 
+In the cost variables we accept categorical values. 
+
+
+```{r function-change_categorical_to_numeric}
+#' Change Categorical Values to Numeric
+#'
+#' This function converts categorical descriptive values in the columns `present`, `adjustment`, and `age` to numeric values.
+#'
+#' @param df A dataframe containing the columns `present`, `adjustment`, and `age`. Default is `df`.
+#' @param present_reduced A string representing the numeric value to assign when `present` is "reduced". Default is `"0.7"`.
+#' @param adjustment_less A string representing the numeric value to assign when `adjustment` is "less". Default is `"0.8"`.
+#' @param adjustment_more A string representing the numeric value to assign when `adjustment` is "more". Default is `"1.2"`.
+#'
+#' @return A dataframe with the `present`, `adjustment`, and `age` columns transformed to numeric values, replacing descriptive values with specified numeric equivalents.
+#' @details The function transforms:
+#'   - The `present` column: "full" becomes `1`, "reduced" becomes the value of `present_reduced`, and `NA` values become `0`. 
+#'   - The `adjustment` column: "more" becomes the value of `adjustment_more`, "less" becomes the value of `adjustment_less`, and `NA` values become `1`.
+#'   - The `age` column: `NA` values are replaced with `18`.
+#'
+#' @export
+change_categorical_to_numeric <- function(df = read_data(), 
+                                          present_reduced = "0.7", 
+                                          adjustment_less = "0.8", 
+                                          adjustment_more = "1.2"){
+  df |> 
+    dplyr::mutate(present = dplyr::case_when(
+      present == "full" ~ "1",
+      present == "reduced" ~ present_reduced,
+      is.na(present) ~ "0",
+      TRUE ~ present
+    )) |> 
+    dplyr::mutate(present = as.numeric(present))  |>
+    dplyr::mutate(adjustment = dplyr::case_when(
+      adjustment == "more" ~ adjustment_more,
+      adjustment == "less" ~ adjustment_less,
+      is.na(adjustment) ~ "1",
+      TRUE ~ adjustment
+    )) |> 
+    dplyr::mutate(adjustment = as.numeric(adjustment)) |> 
+    dplyr::mutate(age = dplyr::case_when(
+      is.na(age) ~ 18,
+      TRUE ~ age
+    ))
+}
+```
+
+```{r examples-change_categorical_to_numeric}
+df <- change_categorical_to_numeric()
+```
+
+
+```{r tests-change_categorical_to_numeric}
+df <- change_categorical_to_numeric()
+testthat::test_that("read_data works properly with internal dataset", {
+  testthat::expect_equal(is.numeric(df$adjustment), TRUE)
+})
+```
+
+
+
+# Get stats
+```{r function-get_stats}
+#' Get Statistics on Participants
+#'
+#' This function calculates statistics regarding the number of adults, children, stays, and absences
+#' in a given data frame based on the `agegroup` and `present` columns.
+#'
+#' @param df A data frame containing at least the following columns:
+#'   - `agegroup`: A character vector indicating whether the participant is an "adult" or a "kid".
+#'   - `present`: A character vector indicating presence with values "x" for stays and "n" for absences.
+#'
+#' @return A list containing:
+#'   - `adults`: The total number of adults in the data frame.
+#'   - `children`: The total number of children in the data frame.
+#'   - `no_of_stays`: The total number of stays indicated by "x" in the `present` column.
+#'   - `no_of_absences`: The total number of absences indicated by "n" in the `present` column.
+#'
+#'
+#' @export
+get_stats <- function(df = read_data()) {
+  stats <- list()
+  stats$adults <- sum(df$agegroup == "adult" , na.rm = TRUE)
+  stats$children <- sum(df$agegroup == "kid", na.rm = TRUE)
+  return(stats)
+}
+```
+
+
+```{r examples-get_stats}
+get_stats(read_data())
+
+```
+
+```{r tests-get_stats}
+testthat::test_that("read_data works properly with internal dataset", {
+  testthat::expect_equal(get_stats(read_data())$adults, 88)
+})
+```
+
+
+```{r function-divide_costs}
+#' Divide Costs Based on Weighted Factors
+#'
+#' This function calculates how much each individual should pay, based on various weighted factors such as age group, adjustment, and presence.
+#'
+#' @param df A dataframe containing the columns `agegroup`, `age`, `adjustment`, and `present`. Default is `df`.
+#' @param cost The total cost to be divided among individuals. Default is `5500`.
+#'
+#' @return A dataframe with an additional column `to_pay`, representing the calculated cost each individual needs to pay based on their weight.
+#' @details The function computes a `weight` for each individual based on:
+#'   - Initializing `weight` to `1`.
+#'   - If `agegroup` is `"kid"`, the weight is updated to `weight * 0.0555 * age`.
+#'   - The weight is further multiplied by values in `adjustment` and `present` columns.
+#'   - The total cost (`cost`) is divided based on the sum of weights to determine each individual's share.
+#'
+#' @importFrom dplyr mutate case_when
+#' @export
+divide_costs <- function(df = read_data() |> change_categorical_to_numeric(), cost = 5500) {
+  df |> 
+    dplyr::mutate(weight = 1) |> 
+    dplyr::mutate(weight = dplyr::case_when(
+      agegroup == "kid" ~ weight * 0.0555 * age,
+      TRUE ~ weight
+    )) |> 
+    dplyr::mutate(weight = weight * adjustment) |> 
+    dplyr::mutate(weight = weight * present) |> 
+    dplyr::mutate(weight = as.numeric(weight)) |> 
+    dplyr::mutate(to_pay = (weight * 5500) / sum(weight, na.rm = TRUE))
+}
+```
+
+
+```{r example-divide_costs}
+df <- divide_costs()
+```
+
+```{r tests-divide_costs}
+df <- divide_costs()
+testthat::test_that("read_data works properly with internal dataset", {
+  testthat::expect_equal(sum(df$to_pay), 5500)
+})
+
+```
+
+
+
