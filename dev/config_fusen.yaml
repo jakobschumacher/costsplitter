@@ -9,10 +9,10 @@ flat_money_transfer.Rmd:
   - tests/testthat/test-read_data.R
   - tests/testthat/test-change_categorical_to_numeric.R
   - tests/testthat/test-get_stats.R
-  vignettes: vignettes/introduction.Rmd
+  vignettes: vignettes/divide-costs-fairly-amongst-friends.Rmd
   inflate:
     flat_file: dev/flat_money_transfer.Rmd
-    vignette_name: introduction
+    vignette_name: Divide costs fairly amongst friends
     open_vignette: true
     check: true
     document: true

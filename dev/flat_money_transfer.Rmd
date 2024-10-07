@@ -5,15 +5,38 @@ editor_options:
   chunk_output_type: console
 ---
 
-# What's this about 
+# What's this package about? 
 Divide the costs of a group undertaking. If you go hiking with your friends the whole group has some costs that need to be divided. If you always share evenly the division can be unfair. What if somebody had to leave early? What if somebody only participated in some activities? What if somebody booked a seat but couldnt show up? What if there is a person who earns less and others would like to chip in? What if there were children who eat less than a full grown adult? This R package tries to balance these problems to have a fair distribution. Friendship is great and all the accounting should be smooth and unproblematic. 
 
-```{r development, include=FALSE}
-library(testthat)
-library(dplyr)
-library(tidyr)
-library(reader)
+# How to use this package
+So you are convinced that this package is something for you? You want to give it a try? Go ahead. Follow the following steps to divide the costs of an activity fair amongst all participants
+
+## Install and load the package
+The package uses R. The package can be installed using devtools and the loaded into R
+
 ```
+devtools::install_github(github.com/jakobschumacher/dividefair)
+library(dividefair)
+```
+
+## Prepare input files
+This is the tricky part of the undertaking. You need to have two files where you collect all the information that you need. Fortunately you can use those files also during the planning of the group activity - so next time you start with a group activity write down the information acording to the following scheme. 
+
+> The `participants.csv` file. This should be a csv file. There should be 4 types of columns in that file: person columns (something like *id*, *name* or *age*), grouping columns (usually called *group*), cost columns (that all start with the prefix *cost_* and the continue with the name of the cost) and lastely and adjustment column (called *adjustment*). You can have a look at the example file [participants.csv](inst/participants.csv)
+
+> The `costs.csv` file. This file contains all the costs. One column must be *id*, one column must be the name of the cost and one column should contain the actual cost. You can have a look at the example file [costs.csv](inst/costs.csv)
+
+## Run the analysis
+This is the easy part. If the input files are in structured in the right way, all you need to do is run:
+
+```
+divide_fairly(participants_file = "link_to_participants_file.csv", costs_file = "link_to_costs_file.csv")
+```
+
+What this will do is: It reads in the files, checks if the files are structured in the right way, changes categorical values into numerical values, it calculates a weight based on the age, adjustment and the grade of involvement. In the end it gives out the amount that everybody needs to pay and whom the money should be paid.
+
+
+# This is the documentation of all functions of the package
 
 ```{r development-dataset}
 # Run all this chunk in the console directly
@@ -23,95 +46,11 @@ pkgload::load_all(path = here::here(), export_all = FALSE)
 
 ```
 
-
-# Function: Read in data
-The trick for a smooth and easy division of costs lies with they way the costs and the amount that people already paid are written down. 
-
-## The _participants.csv_ file
-Columns in the CSV File
-
-    prename: This column contains the first name of each person.
-        Example: "James", "Olivia"
-
-    surname: This column contains the last name of each person.
-        Example: "Smith", "Johnson"
-
-    group: This column represents the group that the person belongs to. It often matches the surname, which can imply that the group is a family or has some other common attribute.
-        Example: "Smith", "Johnson"
-
-    agegroup: This column shows whether the person is an adult or a kid. This helps categorize individuals based on their age for analysis.
-        Possible values: "adult", "kid"
-
-    age: This column contains the actual age of the person if available. Some rows may have missing values, which means the age was not recorded.
-        Example: "23", "14"
-
-    cost_dinnerday1: This column records the cost status for dinner on the first day. It has categories such as "full" or "reduced" to indicate the amount paid for dinner.
-        Possible values: "full", "reduced", or empty (meaning no dinner was recorded)
-
-    cost_day1, cost_day2, cost_day3: These columns indicate the cost status for each individual on Day 1, Day 2, and Day 3, respectively. The values can be "full" or "reduced", indicating whether the individual paid the full cost or a reduced rate.
-        Possible values: "full", "reduced", or empty
-
-    adjustment: This column shows if there was any adjustment made to the person's costs. It indicates if they received a discount or had some cost reduction on any day.
-        Possible values: "less" or empty (if no adjustment was made)
-
-
-```{r function-read_data}
-#' Read data for Grouptraveller
-#'
-#' @param path A file path (string) to an .csv file
-#'
-#' @return
-#' a data frame
-#' @export
-#'
-#' @examples
-read_data <- function(path = system.file("participants.csv", package = "Grouptraveller"),
-                      var_agegroup = "agegroup",
-                      value_adults = "adult",
-                      value_kids = "kid",
-                      indicator_costs = "cost",
-                      var_present = "present") {
-  
-   
-  # Define patterns for adults and kids in both English and German
-  adult_patterns <- tolower(c("adult", "adults", "erwachsene", "erwachsenen"))
-  kid_patterns <- tolower(c("kid", "kids", "kind", "kinder")) 
-
-  readr::read_csv(path, show_col_types = FALSE) |> 
-    janitor::clean_names() |> 
-    dplyr::rename(!!var_agegroup := agegroup) |>
-    dplyr::mutate(!!var_agegroup := dplyr::case_when(
-      tolower(!!dplyr::sym(var_agegroup)) %in% adult_patterns ~ value_adults,
-      tolower(!!dplyr::sym(var_agegroup)) %in% kid_patterns ~ value_kids,
-      TRUE ~ !!dplyr::sym(var_agegroup) # Keep the original value if it doesn't match
-    )) |> 
-    tidyr::pivot_longer(starts_with(indicator_costs), names_to = indicator_costs, values_to = var_present)
-}
-
-```
-
-
-```{r examples-read_data}
-df <- read_data(path = system.file("participants.csv", package = "Grouptraveller"))
-
-```
-
-```{r tests-read_data}
-# Test with your dataset in "inst/"
-df <- read_data(path = system.file("participants.csv", package = "Grouptraveller"))
-# Apply test on my function
-testthat::test_that("read_data works properly with internal dataset", {
-  testthat::expect_equal(nrow(read_data(system.file("participants.csv", package = "Grouptraveller"))), 124)
-})
-```
-
-
-# Helper functions
-We need some helper functions along the way.
+## Function to check conformity of dataset
+This is a helper function that checks if the two data files are in the right format
 
 ## Function to change the categorical values to numerical values 
-In the cost variables we accept categorical values. 
-
+This is a helper function that is used in the read_data function. In the cost variables we accept categorical values. These categorical values need to be turned into numeric values 
 
 ```{r function-change_categorical_to_numeric}
 #' Change Categorical Values to Numeric
@@ -170,7 +109,69 @@ testthat::test_that("read_data works properly with internal dataset", {
 
 
 
-# Get stats
+## Function to read the participants file
+This is a helper function that reads in the data from the participant file
+```{r function-read_data}
+#' Read data
+#'
+#' @param path A file path to the participant.csv file
+#'
+#' @return
+#' a data frame
+#' @export
+#'
+#' @importFrom dplyr mutate case_when
+#' @importFrom tidyr pivot_longer
+#' @importFrom  readr read_csv
+#' @importFrom  janitor clean_names
+#' @examples
+read_data <- function(path = system.file("participants.csv", package = "dividefair"),
+                      var_agegroup = "agegroup",
+                      value_adults = "adult",
+                      value_kids = "kid",
+                      indicator_costs = "cost",
+                      var_present = "present") {
+  
+   
+  # Define patterns for adults and kids in both English and German
+  adult_patterns <- tolower(c("adult", "adults", "erwachsene", "erwachsenen"))
+  kid_patterns <- tolower(c("kid", "kids", "kind", "kinder")) 
+
+  readr::read_csv(path, show_col_types = FALSE) |> 
+    janitor::clean_names() |> 
+    dplyr::rename(!!var_agegroup := agegroup) |>
+    dplyr::mutate(!!var_agegroup := dplyr::case_when(
+      tolower(!!dplyr::sym(var_agegroup)) %in% adult_patterns ~ value_adults,
+      tolower(!!dplyr::sym(var_agegroup)) %in% kid_patterns ~ value_kids,
+      TRUE ~ !!dplyr::sym(var_agegroup) # Keep the original value if it doesn't match
+    )) |> 
+    tidyr::pivot_longer(starts_with(indicator_costs), names_to = indicator_costs, values_to = var_present)
+}
+
+```
+
+
+```{r examples-read_data}
+df <- read_data(path = system.file("participants.csv", package = "dividefair"))
+
+```
+
+```{r tests-read_data}
+# Test with your dataset in "inst/"
+df <- read_data(path = system.file("participants.csv", package = "dividefair"))
+# Apply test on my function
+testthat::test_that("read_data works properly with internal dataset", {
+  testthat::expect_equal(nrow(read_data(system.file("participants.csv", package = "dividefair"))), 124)
+})
+```
+
+
+## Function to read the costs file
+This is a helper function that reads in the data from the participant file
+
+
+## Function to collect some basic stats 
+This function collects some basic stats about the activity and the participants
 ```{r function-get_stats}
 #' Get Statistics on Participants
 #'
@@ -197,7 +198,6 @@ get_stats <- function(df = read_data()) {
 }
 ```
 
-
 ```{r examples-get_stats}
 get_stats(read_data())
 
@@ -209,7 +209,7 @@ testthat::test_that("read_data works properly with internal dataset", {
 })
 ```
 
-
+## Function to calculate the share
 ```{r function-divide_costs}
 #' Divide Costs Based on Weighted Factors
 #'
@@ -241,7 +241,6 @@ divide_costs <- function(df = read_data() |> change_categorical_to_numeric(), co
 }
 ```
 
-
 ```{r example-divide_costs}
 df <- divide_costs()
 ```
@@ -251,8 +250,9 @@ df <- divide_costs()
 testthat::test_that("read_data works properly with internal dataset", {
   testthat::expect_equal(sum(df$to_pay), 5500)
 })
-
 ```
 
+## Function to give you amount each has to pay
+divide_fairly
 
 

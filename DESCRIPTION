@@ -1,5 +1,5 @@
-Package: Grouptraveller
-Title: Accounting for Group Trip
+Package: dividefair
+Title: Divide Costs Fairly Amongst Friends
 Version: 0.1
 Authors@R: 
     person("Jakob", "Schumacher", , "jakob.schumacher@web.de", role = c("aut", "cre"),
@@ -12,6 +12,7 @@ Imports:
     readr,
     tidyr
 Suggests: 
+    Grouptraveller,
     knitr,
     rmarkdown,
     testthat

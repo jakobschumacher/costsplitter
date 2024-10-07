@@ -9,7 +9,7 @@ editor_options:
 # Keep eval=FALSE to avoid infinite loop in case you hit the knit button
 # Execute in the console directly
 fusen::inflate(flat_file = "dev/flat_money_transfer.Rmd", 
-               vignette_name = "introduction", 
+               vignette_name = "Divide costs fairly amongst friends", 
                overwrite = TRUE, 
                clean = TRUE)
 ```
@@ -20,11 +20,10 @@ fusen::inflate(flat_file = "dev/flat_money_transfer.Rmd",
 - Fill the following chunk to create the DESCRIPTION of your package
 
 ```{r description}
-# Describe your package
 fusen::fill_description(
   pkg = here::here(),
   fields = list(
-    Title = "Accounting for group trip",
+    Title = "Divide costs fairly amongst friends",
     Version = 0.1,
     Description = "Do the accounting of a group trip.",
     `Authors@R` = c(

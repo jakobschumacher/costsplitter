@@ -2,10 +2,10 @@
 % Please edit documentation in R/read_data.R
 \name{read_data}
 \alias{read_data}
-\title{Read data for Grouptraveller}
+\title{Read data}
 \usage{
 read_data(
-  path = system.file("participants.csv", package = "Grouptraveller"),
+  path = system.file("participants.csv", package = "dividefair"),
   var_agegroup = "agegroup",
   value_adults = "adult",
   value_kids = "kid",
@@ -14,15 +14,15 @@ read_data(
 )
 }
 \arguments{
-\item{path}{A file path (string) to an .csv file}
+\item{path}{A file path to the participant.csv file}
 }
 \value{
 a data frame
 }
 \description{
-Read data for Grouptraveller
+Read data
 }
 \examples{
-df <- read_data(path = system.file("participants.csv", package = "Grouptraveller"))
+df <- read_data(path = system.file("participants.csv", package = "dividefair"))
 
 }
