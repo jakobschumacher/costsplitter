@@ -5,35 +5,35 @@
 \title{Change Categorical Values to Numeric}
 \usage{
 change_categorical_to_numeric(
-  df = read_data(),
-  present_reduced = "0.7",
-  adjustment_less = "0.8",
-  adjustment_more = "1.2"
+  data_participants = read_participants(),
+  share_reduced = 0.7,
+  adjustment_less = 0.8,
+  adjustment_more = 1.2
 )
 }
 \arguments{
-\item{df}{A dataframe containing the columns \code{present}, \code{adjustment}, and \code{age}. Default is \code{df}.}
+\item{data_participants}{A dataframe containing the columns \code{share}, \code{adjustment}, and \code{age}. Default is \code{data_participants}.}
 
-\item{present_reduced}{A string representing the numeric value to assign when \code{present} is "reduced". Default is \code{"0.7"}.}
+\item{share_reduced}{A string representing the numeric value to assign when \code{share} is "reduced". Default is \code{"0.7"}.}
 
 \item{adjustment_less}{A string representing the numeric value to assign when \code{adjustment} is "less". Default is \code{"0.8"}.}
 
 \item{adjustment_more}{A string representing the numeric value to assign when \code{adjustment} is "more". Default is \code{"1.2"}.}
 }
 \value{
-A dataframe with the \code{present}, \code{adjustment}, and \code{age} columns transformed to numeric values, replacing descriptive values with specified numeric equivalents.
+A dataframe with the \code{share}, \code{adjustment}, and \code{age} columns transformed to numeric values, replacing descriptive values with specified numeric equivalents.
 }
 \description{
-This function converts categorical descriptive values in the columns \code{present}, \code{adjustment}, and \code{age} to numeric values.
+This function converts categorical descriptive values in the columns \code{share}, \code{adjustment}, and \code{age} to numeric values.
 }
 \details{
 The function transforms:
 \itemize{
-\item The \code{present} column: "full" becomes \code{1}, "reduced" becomes the value of \code{present_reduced}, and \code{NA} values become \code{0}.
+\item The \code{share} column: "full" becomes \code{1}, "reduced" becomes the value of \code{share_reduced}, and \code{NA} values become \code{0}.
 \item The \code{adjustment} column: "more" becomes the value of \code{adjustment_more}, "less" becomes the value of \code{adjustment_less}, and \code{NA} values become \code{1}.
 \item The \code{age} column: \code{NA} values are replaced with \code{18}.
 }
 }
 \examples{
-df <- change_categorical_to_numeric()
+data_participants <- change_categorical_to_numeric()
 }

@@ -2,43 +2,41 @@
 
 #' Change Categorical Values to Numeric
 #'
-#' This function converts categorical descriptive values in the columns `present`, `adjustment`, and `age` to numeric values.
+#' This function converts categorical descriptive values in the columns `share`, `adjustment`, and `age` to numeric values.
 #'
-#' @param df A dataframe containing the columns `present`, `adjustment`, and `age`. Default is `df`.
-#' @param present_reduced A string representing the numeric value to assign when `present` is "reduced". Default is `"0.7"`.
+#' @param data_participants A dataframe containing the columns `share`, `adjustment`, and `age`. Default is `data_participants`.
+#' @param share_reduced A string representing the numeric value to assign when `share` is "reduced". Default is `"0.7"`.
 #' @param adjustment_less A string representing the numeric value to assign when `adjustment` is "less". Default is `"0.8"`.
 #' @param adjustment_more A string representing the numeric value to assign when `adjustment` is "more". Default is `"1.2"`.
 #'
-#' @return A dataframe with the `present`, `adjustment`, and `age` columns transformed to numeric values, replacing descriptive values with specified numeric equivalents.
+#' @return A dataframe with the `share`, `adjustment`, and `age` columns transformed to numeric values, replacing descriptive values with specified numeric equivalents.
 #' @details The function transforms:
-#'   - The `present` column: "full" becomes `1`, "reduced" becomes the value of `present_reduced`, and `NA` values become `0`. 
+#'   - The `share` column: "full" becomes `1`, "reduced" becomes the value of `share_reduced`, and `NA` values become `0`. 
 #'   - The `adjustment` column: "more" becomes the value of `adjustment_more`, "less" becomes the value of `adjustment_less`, and `NA` values become `1`.
 #'   - The `age` column: `NA` values are replaced with `18`.
 #'
 #' @export
 #' @examples
-#' df <- change_categorical_to_numeric()
-change_categorical_to_numeric <- function(df = read_data(), 
-                                          present_reduced = "0.7", 
-                                          adjustment_less = "0.8", 
-                                          adjustment_more = "1.2"){
-  df |> 
-    dplyr::mutate(present = dplyr::case_when(
-      present == "full" ~ "1",
-      present == "reduced" ~ present_reduced,
-      is.na(present) ~ "0",
-      TRUE ~ present
+#' data_participants <- change_categorical_to_numeric()
+change_categorical_to_numeric <- function(data_participants = read_participants(), 
+                                          share_reduced = 0.7, 
+                                          adjustment_less = 0.8, 
+                                          adjustment_more = 1.2) {
+  data_participants |> 
+    dplyr::mutate(share = dplyr::case_when(
+      .data$share == "full" ~ 1,
+      .data$share == "reduced" ~ share_reduced,
+      is.na(.data$share) ~ 0,
+      TRUE ~ as.numeric(.data$share)
     )) |> 
-    dplyr::mutate(present = as.numeric(present))  |>
     dplyr::mutate(adjustment = dplyr::case_when(
-      adjustment == "more" ~ adjustment_more,
-      adjustment == "less" ~ adjustment_less,
-      is.na(adjustment) ~ "1",
-      TRUE ~ adjustment
+      .data$adjustment == "more" ~ adjustment_more,
+      .data$adjustment == "less" ~ adjustment_less,
+      is.na(.data$adjustment) ~ 1,
+      TRUE ~ as.numeric(.data$adjustment)
     )) |> 
-    dplyr::mutate(adjustment = as.numeric(adjustment)) |> 
     dplyr::mutate(age = dplyr::case_when(
-      is.na(age) ~ 18,
-      TRUE ~ age
+      is.na(.data$age) ~ 18,
+      TRUE ~ as.numeric(.data$age)
     ))
 }

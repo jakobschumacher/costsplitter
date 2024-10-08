@@ -85,6 +85,9 @@ fusen::draw_package_structure()
 # Pipe
 usethis::use_pipe()
 
+# :=
+usethis::use_import_from("rlang", ":=")
+
 # package-level documentation
 usethis::use_package_doc()
 

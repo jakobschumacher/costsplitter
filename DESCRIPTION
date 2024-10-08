@@ -9,10 +9,11 @@ License: GPL (>= 3)
 Imports: 
     dplyr,
     janitor,
+    magrittr,
     readr,
+    rlang,
     tidyr
 Suggests: 
-    Grouptraveller,
     knitr,
     rmarkdown,
     testthat

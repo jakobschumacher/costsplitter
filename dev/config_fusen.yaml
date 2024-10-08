@@ -3,12 +3,16 @@ flat_money_transfer.Rmd:
   state: active
   R:
   - R/change_categorical_to_numeric.R
+  - R/divide_costs.R
   - R/get_stats.R
-  - R/read_data.R
+  - R/read_costs.R
+  - R/read_participants.R
   tests:
-  - tests/testthat/test-read_data.R
+  - tests/testthat/test-read_costs.R
+  - tests/testthat/test-read_participants.R
   - tests/testthat/test-change_categorical_to_numeric.R
   - tests/testthat/test-get_stats.R
+  - tests/testthat/test-divide_costs.R
   vignettes: vignettes/divide-costs-fairly-amongst-friends.Rmd
   inflate:
     flat_file: dev/flat_money_transfer.Rmd

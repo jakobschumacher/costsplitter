@@ -4,13 +4,13 @@
 \alias{get_stats}
 \title{Get Statistics on Participants}
 \usage{
-get_stats(df = read_data())
+get_stats(data_participants = read_participants())
 }
 \arguments{
-\item{df}{A data frame containing at least the following columns:
+\item{data_participants}{A data frame containing at least the following columns:
 \itemize{
 \item \code{agegroup}: A character vector indicating whether the participant is an "adult" or a "kid".
-\item \code{present}: A character vector indicating presence with values "x" for stays and "n" for absences.
+\item \code{share}: A character vector indicating presence with values "x" for stays and "n" for absences.
 }}
 }
 \value{
@@ -18,15 +18,13 @@ A list containing:
 \itemize{
 \item \code{adults}: The total number of adults in the data frame.
 \item \code{children}: The total number of children in the data frame.
-\item \code{no_of_stays}: The total number of stays indicated by "x" in the \code{present} column.
-\item \code{no_of_absences}: The total number of absences indicated by "n" in the \code{present} column.
 }
 }
 \description{
 This function calculates statistics regarding the number of adults, children, stays, and absences
-in a given data frame based on the \code{agegroup} and \code{present} columns.
+in a given data frame based on the \code{agegroup} and \code{share} columns.
 }
 \examples{
-get_stats(read_data())
+get_stats(read_participants())
 
 }
