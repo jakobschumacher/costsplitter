@@ -7,7 +7,7 @@
 #' @param data_participants A dataframe containing the columns `agegroup`, `age`, `adjustment`, and `share`. Default is `data_participants`.
 #' @param cost The total cost to be divided among individuals. Default is `5500`.
 #'
-#' @return A dataframe with an additional column `to_pay`, representing the calculated cost each individual needs to pay based on their weight.
+#' @return A dataframe with an additional column `costs_produced`, representing the calculated cost each individual needs to pay based on their weight.
 #' @details The function computes a `weight` for each individual based on:
 #'   - Initializing `weight` to `1`.
 #'   - If `agegroup` is `"kid"`, the weight is updated to `weight * 0.0555 * age`.
@@ -18,7 +18,7 @@
 #' @export
 #' @examples
 #' data_participants <- divide_costs()
-divide_costs <- function(data_participants = read_participants() |> change_categorical_to_numeric(), cost = 5500) {
+divide_costs <- function(data_participants = read_participants() |> change_categorical_to_numeric()) {
   data_participants |> 
     dplyr::mutate(weight = 1) |> 
     dplyr::mutate(weight = dplyr::case_when(
@@ -27,6 +27,5 @@ divide_costs <- function(data_participants = read_participants() |> change_categ
     )) |> 
     dplyr::mutate(weight = .data$weight * .data$adjustment) |> 
     dplyr::mutate(weight = .data$weight * .data$share) |> 
-    dplyr::mutate(weight = as.numeric(.data$weight)) |> 
-    dplyr::mutate(to_pay = (.data$weight * cost) / sum(.data$weight, na.rm = TRUE))
+    dplyr::mutate(weight = as.numeric(.data$weight)) 
 }

@@ -5,8 +5,7 @@
 \title{Divide Costs Based on Weighted Factors}
 \usage{
 divide_costs(
-  data_participants = change_categorical_to_numeric(read_participants()),
-  cost = 5500
+  data_participants = change_categorical_to_numeric(read_participants())
 )
 }
 \arguments{
@@ -15,7 +14,7 @@ divide_costs(
 \item{cost}{The total cost to be divided among individuals. Default is \code{5500}.}
 }
 \value{
-A dataframe with an additional column \code{to_pay}, representing the calculated cost each individual needs to pay based on their weight.
+A dataframe with an additional column \code{costs_produced}, representing the calculated cost each individual needs to pay based on their weight.
 }
 \description{
 This function calculates how much each individual should pay, based on various weighted factors such as age group, adjustment, and presence.

@@ -99,7 +99,7 @@ data_participants <- change_categorical_to_numeric()
 This function collects some basic stats about the activity and the participants
 
 ```{r examples-get_stats}
-get_stats(read_participants())
+stats <- get_stats(read_participants())
 
 ```
 
@@ -113,6 +113,29 @@ data_participants <- divide_costs()
 
 
 
+
+## Function to minimize payments between payers and recievers
+This is a helper function. We will recieve people who will recieve money and people who will need to pay money. We need to match those by also reducing the number of payments. 
+
+```{r example-minimize_payments}
+
+df <- data.frame(
+  person = c("Brown", "Smith", "Fisher", "Taylor", "Davis", "Johnson", "Wilson", "ORally"),
+  to_pay = c(-995, -125, -80,  210, 245, 300, 365, 80)
+)
+
+minimize_payments(df)
+
+```
+
+
+
+
 ## Function to give you amount each has to pay
-divide_fairly
+
+```{r example-divide_fairly}
+result <- divide_fairly(pay_by = "group")
+```
+
+
 

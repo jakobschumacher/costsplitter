@@ -219,19 +219,27 @@ change_categorical_to_numeric <- function(data_participants = read_participants(
                                           share_reduced = 0.7, 
                                           adjustment_less = 0.8, 
                                           adjustment_more = 1.2) {
-  data_participants |> 
+  
+  # Keep in mind the case_when needs character on both sides. 
+  share_reduced = as.character(share_reduced)
+  adjustment_less = as.character(adjustment_less)
+  adjustment_more = as.character(adjustment_more)
+  
+data_participants |> 
     dplyr::mutate(share = dplyr::case_when(
-      .data$share == "full" ~ 1,
-      .data$share == "reduced" ~ share_reduced,
-      is.na(.data$share) ~ 0,
-      TRUE ~ as.numeric(.data$share)
-    )) |> 
-    dplyr::mutate(adjustment = dplyr::case_when(
-      .data$adjustment == "more" ~ adjustment_more,
-      .data$adjustment == "less" ~ adjustment_less,
-      is.na(.data$adjustment) ~ 1,
-      TRUE ~ as.numeric(.data$adjustment)
-    )) |> 
+      is.na(.data$share) ~ "0",  
+      .data$share == "full" ~ "1",
+      .data$share == "reduced" ~ "0.7",
+      TRUE ~ .data$share
+    )) |>
+    dplyr::mutate(share = as.numeric(.data$share)) |> 
+  dplyr::mutate(adjustment = dplyr::case_when(
+    .data$adjustment == "more" ~ adjustment_more,
+    .data$adjustment == "less" ~ adjustment_less,
+    is.na(.data$adjustment) ~ "1",
+    TRUE ~ .data$adjustment
+    )) |>
+  dplyr::mutate(adjustment = as.numeric(.data$adjustment)) |> 
     dplyr::mutate(age = dplyr::case_when(
       is.na(.data$age) ~ 18,
       TRUE ~ as.numeric(.data$age)
@@ -283,14 +291,14 @@ get_stats <- function(data_participants = read_participants()) {
 ```
 
 ```{r examples-get_stats}
-get_stats(read_participants())
+stats <- get_stats(read_participants())
 
 ```
 
 ```{r tests-get_stats}
 data_participants <- read_participants()
 testthat::test_that("The function get stats works fine", {
-  testthat::expect_equal(get_stats(data_participants$adults, 88))
+  testthat::expect_equal(get_stats(data_participants)$adults, 88)
 })
 ```
 
@@ -301,9 +309,8 @@ testthat::test_that("The function get stats works fine", {
 #' This function calculates how much each individual should pay, based on various weighted factors such as age group, adjustment, and presence.
 #'
 #' @param data_participants A dataframe containing the columns `agegroup`, `age`, `adjustment`, and `share`. Default is `data_participants`.
-#' @param cost The total cost to be divided among individuals. Default is `5500`.
 #'
-#' @return A dataframe with an additional column `to_pay`, representing the calculated cost each individual needs to pay based on their weight.
+#' @return A dataframe with an additional column `costs_produced`, representing the calculated cost each individual needs to pay based on their weight.
 #' @details The function computes a `weight` for each individual based on:
 #'   - Initializing `weight` to `1`.
 #'   - If `agegroup` is `"kid"`, the weight is updated to `weight * 0.0555 * age`.
@@ -312,7 +319,7 @@ testthat::test_that("The function get stats works fine", {
 #'
 #' @importFrom dplyr mutate case_when
 #' @export
-divide_costs <- function(data_participants = read_participants() |> change_categorical_to_numeric(), cost = 5500) {
+divide_costs <- function(data_participants = read_participants() |> change_categorical_to_numeric()) {
   data_participants |> 
     dplyr::mutate(weight = 1) |> 
     dplyr::mutate(weight = dplyr::case_when(
@@ -321,8 +328,7 @@ divide_costs <- function(data_participants = read_participants() |> change_categ
     )) |> 
     dplyr::mutate(weight = .data$weight * .data$adjustment) |> 
     dplyr::mutate(weight = .data$weight * .data$share) |> 
-    dplyr::mutate(weight = as.numeric(.data$weight)) |> 
-    dplyr::mutate(to_pay = (.data$weight * cost) / sum(.data$weight, na.rm = TRUE))
+    dplyr::mutate(weight = as.numeric(.data$weight)) 
 }
 ```
 
@@ -333,11 +339,214 @@ data_participants <- divide_costs()
 ```{r tests-divide_costs}
 data_participants <- divide_costs()
 testthat::test_that("The function divide costs works properly with internal dataset", {
-  testthat::expect_equal(sum(data_participants$to_pay), 5500)
+  testthat::expect_equal(sum(data_participants$weight), 67.553)
 })
 ```
 
-## Function to give you amount each has to pay
-divide_fairly
 
+## Function to minimize payments between payers and recievers
+This is a helper function. We will recieve people who will recieve money and people who will need to pay money. We need to match those by also reducing the number of payments. 
+
+```{r, function-minimize_payments}
+#' Minimize Payments Between persons
+#'
+#' This function finds the minimum number of transactions required to settle balances between persons where some persons owe money and others need to be paid. It first settles exact matches where a payer owes the exact amount that a receiver needs, and then proceeds to match payers with receivers in a way that minimizes the number of payments.
+#'
+#' @param df A tibble or data frame with two columns: 
+#'   \describe{
+#'     \item{person}{A character vector representing the person IDs (e.g., names).}
+#'     \item{to_pay}{A numeric vector representing the amount each person needs to pay (positive values) or receive (negative values).}
+#'   }
+#'
+#' @return A tibble with three columns:
+#'   \describe{
+#'     \item{payer}{The person that is making a payment.}
+#'     \item{receiver}{The person that is receiving the payment.}
+#'     \item{amount}{The amount of money being transferred.}
+#'   }
+#'
+#' @details 
+#' The function separates the input data frame into payers (persons with positive balances) and receivers (persons with negative balances). It first identifies and settles any exact matches between payers and receivers. Then, for the remaining balances, it matches payers with receivers in a way that minimizes the number of payments.
+#'
+#' @export
+# Function to calculate payments
+minimize_payments <- function(df) {
+  # Separate into payers and receivers
+  payers <- df %>% filter(.data$to_pay > 0) %>% arrange(desc(.data$to_pay))
+  receivers <- df %>% filter(.data$to_pay < 0) %>% arrange(.data$to_pay)
+  
+  # Initialize result data frame to store who pays whom
+  payments <- tibble(payer = character(), receiver = character(), amount = numeric())
+  
+  # Step 1: Settle exact matches first
+  i <- 1
+  while (i <= nrow(payers)) {
+    for (j in 1:nrow(receivers)) {
+      if (payers$to_pay[i] == abs(receivers$to_pay[j])) {
+        # Record the exact match payment
+        payments <- payments %>%
+          add_row(payer = payers$person[i], receiver = receivers$person[j], amount = payers$to_pay[i])
+        
+        # Remove the matched payer and receiver
+        payers <- payers[-i,]
+        receivers <- receivers[-j,]
+        
+        # Start loop again to avoid index shift issues
+        i <- i - 1
+        break
+      }
+    }
+    i <- i + 1
+  }
+  
+  # Step 2: Handle remaining payers and receivers
+  i <- 1  # index for payers
+  j <- 1  # index for receivers
+  
+  while (i <= nrow(payers) && j <= nrow(receivers)) {
+    pay_amount <- min(payers$to_pay[i], abs(receivers$to_pay[j]))
+    
+    # Record the payment
+    payments <- payments %>%
+      add_row(payer = payers$person[i], receiver = receivers$person[j], amount = pay_amount)
+    
+    # Adjust balances
+    payers$to_pay[i] <- payers$to_pay[i] - pay_amount
+    receivers$to_pay[j] <- receivers$to_pay[j] + pay_amount
+    
+    # Move to the next payer/receiver if they are fully settled
+    if (payers$to_pay[i] == 0) i <- i + 1
+    if (receivers$to_pay[j] == 0) j <- j + 1
+  }
+  
+  return(payments)
+}
+```
+
+```{r example-minimize_payments}
+
+df <- data.frame(
+  person = c("Brown", "Smith", "Fisher", "Taylor", "Davis", "Johnson", "Wilson", "ORally"),
+  to_pay = c(-995, -125, -80,  210, 245, 300, 365, 80)
+)
+
+minimize_payments(df)
+
+```
+
+
+```{r tests-minimize_payments}
+library(dplyr)
+df <- tibble(
+  person = c("Brown", "Smith", "Fisher", "Taylor", "Davis", "Johnson", "Wilson", "ORally"),
+  to_pay = c(-995, -125, -80,  210, 245, 300, 365, 80)
+)
+
+df_solved <- minimize_payments(df)
+
+testthat::test_that("The function divide costs works properly with internal dataset", {
+  testthat::expect_equal(df_solved[df_solved$payer == "Wilson", 3] |> pull(), 365)
+})
+
+testthat::test_that("The function divide costs works properly with internal dataset", {
+  testthat::expect_equal(sum(df_solved$amount), 1200)
+})
+```
+
+
+## Function to give you amount each has to pay
+
+```{r function-divide_fairly}
+#' Divide Costs Fairly Among Participants
+#'
+#' This function calculates the fair division of costs among participants based on their weights.
+#' It reads the participants' and costs' data from files, calculates the total costs for each participant or group,
+#' and returns the amounts to be paid after applying any payments that have already been made.
+#'
+#' @param participants_file Path to the CSV file containing participants' information. Defaults to a file within the package.
+#' @param costs_file Path to the CSV file containing costs' information. Defaults to a file within the package.
+#' @param pay_by A string specifying whether to divide costs by "group" or "individual". Defaults to "group".
+#'
+#' @return A data frame containing the final payments for each person or group after minimizing the payments.
+#'
+#' @details
+#' The function starts by reading the participants and costs data. It calculates the total costs and
+#' distributes them based on the participants' weights. It also considers the payments already made.
+#' Depending on the `pay_by` argument, costs are divided either by group or by individual. The final step
+#' involves minimizing the payments using the `minimize_payments` function.
+#'
+#' @import dplyr tidyr
+#' @export
+divide_fairly <- function(participants_file = system.file("participants.csv", package = "dividefair"), 
+                          costs_file = system.file("costs.csv", package = "dividefair"),
+                          pay_by = "group"){
+
+  # Reading in the data
+  data_participants <- read_participants() |> 
+    change_categorical_to_numeric() |> 
+    divide_costs()
+  data_costs <- read_costs()
+  
+  # Doing first calculations
+  total_costs <- sum(data_costs$cost)
+  total_weights <- sum(data_participants$weight)
+  cost_per_weight <- total_costs / total_weights
+  
+  # Calculate costs_produced
+  data_participants <- data_participants |> 
+    dplyr::mutate(costs_produced = .data$weight * cost_per_weight) 
+  
+  # Summarise and add the costs
+  if (pay_by == "group") {
+    df <- data_participants |> 
+      dplyr::group_by(.data$group) |> 
+      dplyr::summarise(costs_produced = sum(.data$costs_produced))|> 
+      dplyr::left_join(
+        data_costs |> 
+          dplyr::group_by(.data$group) |> 
+          dplyr::summarise(payed = sum(.data$cost)),
+        by = "group"
+      ) |> 
+      dplyr::mutate(payed = tidyr::replace_na(.data$payed, 0)) |> 
+      dplyr::mutate(to_pay_unrounded = .data$costs_produced - .data$payed) |> 
+      dplyr::mutate(to_pay = round(.data$to_pay_unrounded / 5) * 5) |> 
+      dplyr::mutate(person = .data$group)
+  } else if (pay_by == "individual") {
+    df <- data_participants |> 
+      dplyr::group_by(.data$id) |> 
+      dplyr::summarise(costs_produced = sum(.data$costs_produced))|> 
+      dplyr::left_join(
+        data_costs |> 
+          dplyr::group_by(.data$id) |> 
+          dplyr::summarise(payed = sum(.data$cost)),
+        by = "id"
+      ) |> 
+      dplyr::mutate(payed = tidyr::replace_na(.data$payed, 0)) |> 
+      dplyr::mutate(to_pay_unrounded = .data$costs_produced - .data$payed) |> 
+      dplyr::mutate(to_pay = round(.data$to_pay_unrounded / 5) * 5) |> 
+      dplyr::mutate(person = as.character(.data$id))
+  }
+  
+  # Apply the minimize_payment function
+  results <- minimize_payments(df |> dplyr::select(.data$person, .data$to_pay))
+  
+  return(results)
+}
+
+
+
+```
+
+```{r example-divide_fairly}
+result <- divide_fairly(pay_by = "group")
+```
+
+```{r tests-divide_fairly}
+
+result <- divide_fairly(pay_by = "group")
+testthat::test_that("The function divide costs works properly with internal dataset", {
+  testthat::expect_equal(sum(result$amount), 1120)
+})
+
+```
 

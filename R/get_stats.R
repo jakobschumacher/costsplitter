@@ -16,7 +16,7 @@
 #'
 #' @export
 #' @examples
-#' get_stats(read_participants())
+#' stats <- get_stats(read_participants())
 #'
 get_stats <- function(data_participants = read_participants()) {
   stats <- list()

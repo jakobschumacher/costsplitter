@@ -25,6 +25,6 @@ This function calculates statistics regarding the number of adults, children, st
 in a given data frame based on the \code{agegroup} and \code{share} columns.
 }
 \examples{
-get_stats(read_participants())
+stats <- get_stats(read_participants())
 
 }

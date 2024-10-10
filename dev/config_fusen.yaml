@@ -4,7 +4,9 @@ flat_money_transfer.Rmd:
   R:
   - R/change_categorical_to_numeric.R
   - R/divide_costs.R
+  - R/divide_fairly.R
   - R/get_stats.R
+  - R/minimize_payments.R
   - R/read_costs.R
   - R/read_participants.R
   tests:
@@ -13,6 +15,8 @@ flat_money_transfer.Rmd:
   - tests/testthat/test-change_categorical_to_numeric.R
   - tests/testthat/test-get_stats.R
   - tests/testthat/test-divide_costs.R
+  - tests/testthat/test-minimize_payments.R
+  - tests/testthat/test-divide_fairly.R
   vignettes: vignettes/divide-costs-fairly-amongst-friends.Rmd
   inflate:
     flat_file: dev/flat_money_transfer.Rmd

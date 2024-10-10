@@ -22,19 +22,27 @@ change_categorical_to_numeric <- function(data_participants = read_participants(
                                           share_reduced = 0.7, 
                                           adjustment_less = 0.8, 
                                           adjustment_more = 1.2) {
-  data_participants |> 
+  
+  # Keep in mind the case_when needs character on both sides. 
+  share_reduced = as.character(share_reduced)
+  adjustment_less = as.character(adjustment_less)
+  adjustment_more = as.character(adjustment_more)
+  
+data_participants |> 
     dplyr::mutate(share = dplyr::case_when(
-      .data$share == "full" ~ 1,
-      .data$share == "reduced" ~ share_reduced,
-      is.na(.data$share) ~ 0,
-      TRUE ~ as.numeric(.data$share)
-    )) |> 
-    dplyr::mutate(adjustment = dplyr::case_when(
-      .data$adjustment == "more" ~ adjustment_more,
-      .data$adjustment == "less" ~ adjustment_less,
-      is.na(.data$adjustment) ~ 1,
-      TRUE ~ as.numeric(.data$adjustment)
-    )) |> 
+      is.na(.data$share) ~ "0",  
+      .data$share == "full" ~ "1",
+      .data$share == "reduced" ~ "0.7",
+      TRUE ~ .data$share
+    )) |>
+    dplyr::mutate(share = as.numeric(.data$share)) |> 
+  dplyr::mutate(adjustment = dplyr::case_when(
+    .data$adjustment == "more" ~ adjustment_more,
+    .data$adjustment == "less" ~ adjustment_less,
+    is.na(.data$adjustment) ~ "1",
+    TRUE ~ .data$adjustment
+    )) |>
+  dplyr::mutate(adjustment = as.numeric(.data$adjustment)) |> 
     dplyr::mutate(age = dplyr::case_when(
       is.na(.data$age) ~ 18,
       TRUE ~ as.numeric(.data$age)

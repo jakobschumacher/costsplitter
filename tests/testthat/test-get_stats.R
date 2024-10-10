@@ -2,5 +2,5 @@
 
 data_participants <- read_participants()
 testthat::test_that("The function get stats works fine", {
-  testthat::expect_equal(get_stats(data_participants$adults, 88))
+  testthat::expect_equal(get_stats(data_participants)$adults, 88)
 })
