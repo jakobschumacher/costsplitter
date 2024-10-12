@@ -1,6 +1,6 @@
-id,prename,surname,group,unit,cost
-10,Charlotte,Brown,Brown,day1,400
-10,Charlotte,Brown,Brown,day2,900
-4,Amelia,Taylor,Smith,day3,800
-12,Mia,Davis,Davis,dinnerday1,320
-4,Amelia,Taylor,Smith,day1,400
+id,name,group,unit,cost
+10,Charlotte Brown,Brown,day1,400
+10,Charlotte Brown,Brown,day2,900
+4,Amelia Taylor,Smith,day3,800
+12,Mia Davis,Davis,dinnerday1,320
+4,Amelia Taylor,Smith,day1,400

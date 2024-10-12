@@ -1,32 +1,32 @@
-id,prename,surname,group,agegroup,age,cost_dinnerday1,cost_day1,cost_day2,cost_day3,adjustment
-1,James,Smith,Smith,adult,23,full,full,full,full,NA
-2,Olivia,Johnson,Johnson,adult,NA,NA,0.8,full,full,less
-3,Ethan,Brown,Brown,kid,3,full,full,full,full,NA
-4,Amelia,Taylor,Smith,adult,NA,NA,full,full,full,NA
-5,Lucas,Wilson,Wilson,adult,NA,full,NA,NA,full,NA
-6,Emma,Davis,Smith,adult,NA,NA,full,full,full,NA
-7,Henry,Smith,Smith,adult,NA,NA,reduced,reduced,reduced,less
-8,Ava,Taylor,Taylor,kid,14,reduced,reduced,reduced,reduced,NA
-9,Benjamin,Johnson,Johnson,kid,12,NA,full,full,full,NA
-10,Charlotte,Brown,Brown,kid,10,NA,0.7,full,full,less
-11,Noah,Wilson,Wilson,kid,12,NA,full,full,full,less
-12,Mia,Davis,Davis,adult,NA,reduced,0.3,0.3,full,less
-13,Jack,Taylor,Taylor,adult,NA,NA,full,full,0.9,NA
-14,Isabella,Smith,Smith,adult,NA,NA,full,full,0.9,more
-15,Samuel,Johnson,Smith,adult,NA,NA,full,full,full,NA
-16,Sophia,Wilson,Smith,adult,NA,NA,full,reduced,full,NA
-17,Elijah,Brown,Smith,adult,NA,NA,full,reduced,full,0.4
-18,Grace,Smith,Smith,kid,12,NA,full,full,full,0.4
-19,William,Davis,Davis,kid,10,NA,full,full,full,NA
-20,Harper,Wilson,Wilson,adult,NA,NA,full,full,full,NA
-21,Alexander,Taylor,Taylor,kid,0,NA,full,full,full,NA
-22,Ella,Johnson,Johnson,adult,NA,NA,full,full,full,NA
-23,Daniel,Brown,Brown,adult,NA,NA,full,full,full,NA
-24,Chloe,Davis,Davis,adult,NA,NA,reduced,reduced,reduced,NA
-25,Matthew,Smith,Davis,adult,NA,NA,reduced,reduced,reduced,NA
-26,Lily,Johnson,Davis,adult,NA,NA,reduced,reduced,reduced,NA
-27,Jacob,Taylor,Davis,adult,NA,NA,full,full,full,less
-28,Zoe,Brown,Brown,adult,NA,NA,full,full,full,less
-29,Thomas,Wilson,Wilson,adult,NA,NA,reduced,reduced,reduced,NA
-30,Ruby,Smith,Smith,adult,NA,NA,full,full,full,NA
-31,Nathan,Davis,Davis,kid,8,NA,full,full,full,NA
+id,name,group,age,cost_dinnerday1,cost_day1,cost_day2,cost_day3,adjustment
+1,James Smith,Smith,adult,full,full,full,full,NA
+2,Olivia Johnson,Johnson,NA,NA,0.8,full,full,less
+3,Ethan Brown,Brown,3,full,full,full,full,NA
+4,Amelia Taylor,Smith,adult,NA,full,full,full,NA
+5,Lucas Wilson,Wilson,adult,full,NA,NA,full,NA
+6,Emma Davis,Smith,NA,NA,full,full,full,NA
+7,Henry Smith,Smith,adult,NA,reduced,reduced,reduced,less
+8,Ava Taylor,Taylor,14,reduced,reduced,reduced,reduced,NA
+9,Benjamin Johnson,Johnson,12,NA,full,full,full,NA
+10,Charlotte Brown,Brown,10,NA,0.7,full,full,less
+11,Noah Wilson,Wilson,12,NA,full,full,full,less
+12,Mia Davis,Davis,NA,reduced,0.3,0.3,full,less
+13,Jack Taylor,Taylor,NA,NA,full,full,0.9,NA
+14,Isabella Smith,Smith,kid,NA,full,full,0.9,more
+15,Samuel Johnson,Smith,kid,NA,full,full,full,NA
+16,Sophia Wilson,Smith,kid,NA,full,reduced,full,NA
+17,Elijah Brown,Smith,NA,NA,full,reduced,full,0.4
+18,Grace Smith,Smith,12,NA,full,full,full,0.4
+19,William Davis,Davis,10,NA,full,full,full,NA
+20,Harper Wilson,Wilson,NA,NA,full,full,full,NA
+21,Alexander Taylor,Taylor,0,NA,full,full,full,NA
+22,Ella Johnson,Johnson,adult,NA,full,full,full,NA
+23,Daniel Brown,Brown,adult,NA,full,full,full,NA
+24,Chloe Davis,Davis,adult,NA,reduced,reduced,reduced,NA
+25,Matthew Smith,Davis,adult,NA,reduced,reduced,reduced,NA
+26,Lily Johnson,Davis,adult,NA,reduced,reduced,reduced,NA
+27,Jacob Taylor,Davis,NA,NA,full,full,full,less
+28,Zoe Brown,Brown,NA,NA,full,full,full,less
+29,Thomas Wilson,Wilson,adult,NA,reduced,reduced,reduced,NA
+30,Ruby Smith,Smith,NA,NA,full,full,full,NA
+31,Nathan Davis,Davis,8,NA,full,full,full,NA
