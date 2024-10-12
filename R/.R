@@ -37,7 +37,7 @@
 #' @examples
 #' data_participants <- read_participants()()
 #'
-read_participants() <- function(path = system.file("participants.csv", package = "dividefair"),
+read_participants() <- function(path = system.file("participants.csv", package = "costsplitter"),
                       var_id = "id",
                       var_age = "age",
                       var_group = "group",

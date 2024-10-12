@@ -5,7 +5,7 @@
 \title{Read and Process Participant Data from CSV}
 \usage{
 check_participants(
-  participants_df = read.csv(system.file("participants.csv", package = "dividefair")),
+  participants_df = read.csv(system.file("participants.csv", package = "costsplitter")),
   var_name = "name",
   var_age = "age",
   var_group = "group",

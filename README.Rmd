@@ -13,18 +13,18 @@ knitr::opts_chunk$set(
 )
 ```
 
-# dividefair
+# costsplitter
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/jakobschumacher/dividefairly/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/jakobschumacher/dividefairly/actions/workflows/R-CMD-check.yaml)
 [![Codecov test coverage](https://codecov.io/gh/jakobschumacher/dividefairly/graph/badge.svg)](https://app.codecov.io/gh/jakobschumacher/dividefairly)
 <!-- badges: end -->
 
-The goal of dividefair is to ...
+The goal of costsplitter is to ...
 
 ## Installation
 
-You can install the development version of dividefair from [GitHub](https://github.com/) with:
+You can install the development version of costsplitter from [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("pak")
@@ -40,7 +40,7 @@ Full documentation website on: https://jakobschumacher.github.io/dividefairly
 This is a basic example which shows you how to solve a common problem:
 
 ```{r example}
-library(dividefair)
+library(costsplitter)
 ## basic example code
 ```
 

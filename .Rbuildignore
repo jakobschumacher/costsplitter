@@ -2,7 +2,7 @@
 ^LICENSE\.md$
 ^Grouptraveller\.Rproj$
 ^\.Rproj\.user$
-^dividefair\.Rproj$
+^costsplitter\.Rproj$
 ^README\.Rmd$
 ^\.github$
 ^codecov\.yml$

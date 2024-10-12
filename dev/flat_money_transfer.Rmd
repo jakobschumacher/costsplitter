@@ -25,7 +25,7 @@ This is a helper function that reads in the data from the participant file.
 #'
 #' This function reads cost data from a dataset and checks if it works for the pourpose of this package.
 #'
-#' @param cost_df A character string specifying data. Defaults to the read.csv(system.file("costs.csv", package = "dividefair")), which is the file included in the dividefair package.
+#' @param cost_df A character string specifying data. Defaults to the read.csv(system.file("costs.csv", package = "costsplitter")), which is the file included in the costsplitter package.
 #'
 #' @return A tibble containing the cost data read from the CSV file.
 #'
@@ -33,7 +33,7 @@ This is a helper function that reads in the data from the participant file.
 #' @importFrom glue glue
 #'
 #' @export
-check_costs <- function(cost_df = read.csv(system.file("costs.csv", package = "dividefair"))) {
+check_costs <- function(cost_df = read.csv(system.file("costs.csv", package = "costsplitter"))) {
   
   # Assert that the required columns are present
   required_columns <- c("name", "unit", "cost")
@@ -55,7 +55,7 @@ check_costs <- function(cost_df = read.csv(system.file("costs.csv", package = "d
 ```
 
 ```{r example-check_costs}
-data_costs <- dividefair::check_costs()
+data_costs <- costsplitter::check_costs()
 ```
 
 ```{r test-check_costs}
@@ -132,7 +132,7 @@ This is a helper function that reads in the data from the participant file
 #' @importFrom rlang sym
 #'
 #' @export
-check_participants <- function(participants_df = read.csv(system.file("participants.csv", package = "dividefair")),
+check_participants <- function(participants_df = read.csv(system.file("participants.csv", package = "costsplitter")),
                               var_name = "name",
                               var_age = "age",
                               var_group = "group",
@@ -522,7 +522,7 @@ testthat::test_that("The function divide costs works properly with internal data
 
 ## Function to give you amount each has to pay
 
-```{r function-divide_fairly}
+```{r function-costsplitter}
 #' Divide Costs Fairly Among Participants
 #'
 #' This function calculates the fair division of costs among participants based on their weights.
@@ -543,7 +543,7 @@ testthat::test_that("The function divide costs works properly with internal data
 #'
 #' @import dplyr tidyr
 #' @export
-divide_fairly <- function(participants_df = check_participants(), 
+costsplitter <- function(participants_df = check_participants(), 
                           costs_df = check_costs(),
                           pay_by = "group"){
 
@@ -607,13 +607,13 @@ divide_fairly <- function(participants_df = check_participants(),
 
 ```
 
-```{r example-divide_fairly}
-result <- divide_fairly(pay_by = "group")
+```{r example-costsplitter}
+result <- costsplitter(pay_by = "group")
 ```
 
-```{r tests-divide_fairly}
+```{r tests-costsplitter}
 
-result <- divide_fairly(pay_by = "group")
+result <- costsplitter(pay_by = "group")
 testthat::test_that("The function divide costs works properly with internal dataset", {
   testthat::expect_equal(sum(result$amount), 1120)
 })

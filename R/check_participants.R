@@ -37,7 +37,7 @@
 #' @examples
 #' data_participants <- check_participants()
 #'
-check_participants <- function(participants_df = read.csv(system.file("participants.csv", package = "dividefair")),
+check_participants <- function(participants_df = read.csv(system.file("participants.csv", package = "costsplitter")),
                               var_name = "name",
                               var_age = "age",
                               var_group = "group",

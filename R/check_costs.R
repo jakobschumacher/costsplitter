@@ -4,7 +4,7 @@
 #'
 #' This function reads cost data from a dataset and checks if it works for the pourpose of this package.
 #'
-#' @param cost_df A character string specifying data. Defaults to the read.csv(system.file("costs.csv", package = "dividefair")), which is the file included in the dividefair package.
+#' @param cost_df A character string specifying data. Defaults to the read.csv(system.file("costs.csv", package = "costsplitter")), which is the file included in the costsplitter package.
 #'
 #' @return A tibble containing the cost data read from the CSV file.
 #'
@@ -13,8 +13,8 @@
 #'
 #' @export
 #' @examples
-#' data_costs <- dividefair::check_costs()
-check_costs <- function(cost_df = read.csv(system.file("costs.csv", package = "dividefair"))) {
+#' data_costs <- costsplitter::check_costs()
+check_costs <- function(cost_df = read.csv(system.file("costs.csv", package = "costsplitter"))) {
   
   # Assert that the required columns are present
   required_columns <- c("name", "unit", "cost")

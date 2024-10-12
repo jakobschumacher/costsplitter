@@ -5,11 +5,11 @@
 \title{Read and check cost data}
 \usage{
 check_costs(
-  cost_df = read.csv(system.file("costs.csv", package = "dividefair"))
+  cost_df = read.csv(system.file("costs.csv", package = "costsplitter"))
 )
 }
 \arguments{
-\item{cost_df}{A character string specifying data. Defaults to the read.csv(system.file("costs.csv", package = "dividefair")), which is the file included in the dividefair package.}
+\item{cost_df}{A character string specifying data. Defaults to the read.csv(system.file("costs.csv", package = "costsplitter")), which is the file included in the costsplitter package.}
 }
 \value{
 A tibble containing the cost data read from the CSV file.
@@ -18,5 +18,5 @@ A tibble containing the cost data read from the CSV file.
 This function reads cost data from a dataset and checks if it works for the pourpose of this package.
 }
 \examples{
-data_costs <- dividefair::check_costs()
+data_costs <- costsplitter::check_costs()
 }
