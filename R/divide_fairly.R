@@ -22,15 +22,19 @@
 #' @export
 #' @examples
 #' result <- divide_fairly(pay_by = "group")
-divide_fairly <- function(participants_file = system.file("participants.csv", package = "dividefair"), 
-                          costs_file = system.file("costs.csv", package = "dividefair"),
+divide_fairly <- function(participants_df = check_participants(), 
+                          costs_df = check_costs(),
                           pay_by = "group"){
 
   # Reading in the data
-  data_participants <- read_participants() |> 
-    cat_to_num() |> 
-    divide_costs()
-  data_costs <- read_costs()
+  data_participants <- participants_df |> 
+    cat_to_num() 
+  data_costs <- check_costs()
+  
+  # Calculate the weights
+  data_participants <- data_participants |> 
+    dplyr::mutate(weight = adjustment * share * age) 
+  
   
   # Doing first calculations
   total_costs <- sum(data_costs$cost)
@@ -39,41 +43,41 @@ divide_fairly <- function(participants_file = system.file("participants.csv", pa
   
   # Calculate costs_produced
   data_participants <- data_participants |> 
-    dplyr::mutate(costs_produced = .data$weight * cost_per_weight) 
+    dplyr::mutate(costs_produced = weight * cost_per_weight) 
   
   # Summarise and add the costs
   if (pay_by == "group") {
     df <- data_participants |> 
-      dplyr::group_by(.data$group) |> 
-      dplyr::summarise(costs_produced = sum(.data$costs_produced))|> 
+      dplyr::group_by(group) |> 
+      dplyr::summarise(costs_produced = sum(costs_produced))|> 
       dplyr::left_join(
         data_costs |> 
-          dplyr::group_by(.data$group) |> 
-          dplyr::summarise(payed = sum(.data$cost)),
+          dplyr::group_by(group) |> 
+          dplyr::summarise(payed = sum(cost)),
         by = "group"
       ) |> 
-      dplyr::mutate(payed = tidyr::replace_na(.data$payed, 0)) |> 
-      dplyr::mutate(to_pay_unrounded = .data$costs_produced - .data$payed) |> 
-      dplyr::mutate(to_pay = round(.data$to_pay_unrounded / 5) * 5) |> 
-      dplyr::mutate(person = .data$group)
+      dplyr::mutate(payed = tidyr::replace_na(payed, 0)) |> 
+      dplyr::mutate(to_pay_unrounded = costs_produced - payed) |> 
+      dplyr::mutate(to_pay = round(to_pay_unrounded / 5) * 5) |> 
+      dplyr::mutate(person = group)
   } else if (pay_by == "individual") {
     df <- data_participants |> 
-      dplyr::group_by(.data$id) |> 
-      dplyr::summarise(costs_produced = sum(.data$costs_produced))|> 
+      dplyr::group_by(id) |> 
+      dplyr::summarise(costs_produced = sum(costs_produced))|> 
       dplyr::left_join(
         data_costs |> 
-          dplyr::group_by(.data$id) |> 
-          dplyr::summarise(payed = sum(.data$cost)),
+          dplyr::group_by(id) |> 
+          dplyr::summarise(payed = sum(cost)),
         by = "id"
       ) |> 
-      dplyr::mutate(payed = tidyr::replace_na(.data$payed, 0)) |> 
-      dplyr::mutate(to_pay_unrounded = .data$costs_produced - .data$payed) |> 
-      dplyr::mutate(to_pay = round(.data$to_pay_unrounded / 5) * 5) |> 
-      dplyr::mutate(person = as.character(.data$id))
+      dplyr::mutate(payed = tidyr::replace_na(payed, 0)) |> 
+      dplyr::mutate(to_pay_unrounded = costs_produced - payed) |> 
+      dplyr::mutate(to_pay = round(to_pay_unrounded / 5) * 5) |> 
+      dplyr::mutate(person = as.character(id))
   }
   
   # Apply the minimize_payment function
-  results <- minimize_payments(df |> dplyr::select(.data$person, .data$to_pay))
+  results <- minimize_payments(df |> dplyr::select(person, to_pay))
   
   return(results)
 }

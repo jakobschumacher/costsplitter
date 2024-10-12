@@ -4,7 +4,7 @@
 \alias{get_stats}
 \title{Get Statistics on Participants}
 \usage{
-get_stats(data_participants = read_participants())
+get_stats(data_participants = check_participants())
 }
 \arguments{
 \item{data_participants}{A data frame containing at least the following columns:
@@ -25,6 +25,6 @@ This function calculates statistics regarding the number of adults, children, st
 in a given data frame based on the \code{agegroup} and \code{share} columns.
 }
 \examples{
-stats <- get_stats(read_participants())
+stats <- get_stats(check_participants())
 
 }

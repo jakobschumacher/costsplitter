@@ -8,10 +8,7 @@ editor_options:
 ```{r development-inflate, eval=FALSE}
 # Keep eval=FALSE to avoid infinite loop in case you hit the knit button
 # Execute in the console directly
-fusen::inflate(flat_file = "dev/flat_money_transfer.Rmd", 
-               vignette_name = "Divide costs fairly amongst friends", 
-               overwrite = TRUE, 
-               clean = TRUE)
+fusen::inflate(flat_file = "dev/flat_money_transfer.Rmd", vignette_name = "Divide costs fairly amongst friends", overwrite = TRUE, clean = TRUE)
 ```
 
 

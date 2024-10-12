@@ -549,8 +549,7 @@ divide_fairly <- function(participants_df = check_participants(),
 
   # Reading in the data
   data_participants <- participants_df |> 
-    cat_to_num() |> 
-    divide_costs()
+    cat_to_num() 
   data_costs <- check_costs()
   
   # Calculate the weights

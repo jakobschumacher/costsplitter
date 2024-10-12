@@ -3,3 +3,6 @@
 ^Grouptraveller\.Rproj$
 ^\.Rproj\.user$
 ^dividefair\.Rproj$
+^README\.Rmd$
+^\.github$
+^codecov\.yml$

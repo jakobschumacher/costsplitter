@@ -33,8 +33,8 @@
 # Function to calculate payments
 minimize_payments <- function(df) {
   # Separate into payers and receivers
-  payers <- df %>% filter(.data$to_pay > 0) %>% arrange(desc(.data$to_pay))
-  receivers <- df %>% filter(.data$to_pay < 0) %>% arrange(.data$to_pay)
+  payers <- df %>% filter(to_pay > 0) %>% dplyr::arrange(desc(to_pay))
+  receivers <- df %>% filter(to_pay < 0) %>% dplyr::arrange(to_pay)
   
   # Initialize result data frame to store who pays whom
   payments <- tibble(payer = character(), receiver = character(), amount = numeric())

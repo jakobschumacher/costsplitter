@@ -9,7 +9,7 @@
 Do the accounting of a group trip.
 }
 \author{
-\strong{Maintainer}: Jakob Schumacher \email{jakob.schumacher@web.de} (\href{https://orcid.org/0000-0000-0000-0000}{ORCID})
+\strong{Maintainer}: Jakob Schumacher \email{jakob.schumacher@web.de} (\href{https://orcid.org/0000-0002-9894-6085}{ORCID})
 
 }
 \keyword{internal}

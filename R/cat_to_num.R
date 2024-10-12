@@ -12,37 +12,58 @@
 #' @return A dataframe with transformed values.
 #' @export
 #' @examples
-#' data_participants <- cat_to_num(data_participants = read_participants(), 
-#'                                           share_reduced = 0.7, 
-#'                                           adjustment_less = 0.8, 
-#'                                           adjustment_more = 1.2)
-cat_to_num <- function(data_participants = read_participants(), 
-                                          share_reduced = 0.7, 
-                                          adjustment_less = 0.8, 
-                                          adjustment_more = 1.2) {
+#' data_participants = check_participants()
+#' data_participants2 <- cat_to_num(data_participants)
+cat_to_num <- function(data = check_participants(),
+                       age_adjustment = (1 / 18),
+                       share_adult = 1,
+                       share_kid = 0.5,
+                       share_full = 1, 
+                       share_reduced = 0.7, 
+                       share_less = 0.8, 
+                       share_more = 1.2) {
+  
+  
+  # Define patterns for adults and kids in both English and German
+  adult_patterns <- tolower(c("adult", "adults", "erwachsene", "erwachsenen"))
+  kid_patterns <- tolower(c("kid", "kids", "kind", "kinder"))
   
   # Keep in mind the case_when needs character on both sides. 
-  share_reduced = as.character(share_reduced)
-  adjustment_less = as.character(adjustment_less)
-  adjustment_more = as.character(adjustment_more)
+  share_reduced_character = as.character(share_reduced)
+  share_adult_character = as.character(share_adult * 18 )
+  share_kid_character = as.character(share_kid * 18)
+  share_full_character = as.character(share_full)
+  share_reduced_character = as.character(share_reduced)
+  share_less_character = as.character(share_less)
+  share_more_character = as.character(share_more)
   
-data_participants |> 
-    dplyr::mutate(share = dplyr::case_when(
-      is.na(.data$share) ~ "0",  
-      .data$share == "full" ~ "1",
-      .data$share == "reduced" ~ "0.7",
-      TRUE ~ .data$share
-    )) |>
-    dplyr::mutate(share = as.numeric(.data$share)) |> 
-  dplyr::mutate(adjustment = dplyr::case_when(
-    .data$adjustment == "more" ~ adjustment_more,
-    .data$adjustment == "less" ~ adjustment_less,
-    is.na(.data$adjustment) ~ "1",
-    TRUE ~ .data$adjustment
-    )) |>
-  dplyr::mutate(adjustment = as.numeric(.data$adjustment)) |> 
+  # Change the categorical values to numerical values
+  data <- data %>%
+    # Age
     dplyr::mutate(age = dplyr::case_when(
-      is.na(.data$age) ~ 18,
-      TRUE ~ as.numeric(.data$age)
-    ))
+      is.na(age) | age == "" ~ "18",
+      age %in% adult_patterns ~ share_adult_character,
+      age %in% kid_patterns ~ share_kid_character,
+      TRUE ~ age 
+    )) |> 
+    dplyr::mutate(age = as.numeric(age)) |> 
+    dplyr::mutate(age = round(age * age_adjustment, 2)) |> 
+    # Share
+    dplyr::mutate(share = dplyr::case_when(
+      is.na(share) | share == "" ~ "0",  
+      share == "full" ~ "1",
+      share == "reduced" ~ "0.7",
+      TRUE ~ share
+    )) |>
+    dplyr::mutate(share = as.numeric(share)) |> 
+    # Adjustment
+    dplyr::mutate(adjustment = dplyr::case_when(
+      is.na(adjustment) | adjustment == "" ~ "1",
+      adjustment == "more" ~ share_more_character,
+      adjustment == "less" ~ share_less_character,
+      TRUE ~ adjustment
+    )) |>
+    dplyr::mutate(adjustment = as.numeric(adjustment)) 
+  
+  return(data)
 }

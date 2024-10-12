@@ -5,17 +5,17 @@
 \title{Divide Costs Fairly Among Participants}
 \usage{
 divide_fairly(
-  participants_file = system.file("participants.csv", package = "dividefair"),
-  costs_file = system.file("costs.csv", package = "dividefair"),
+  participants_df = check_participants(),
+  costs_df = check_costs(),
   pay_by = "group"
 )
 }
 \arguments{
+\item{pay_by}{A string specifying whether to divide costs by "group" or "individual". Defaults to "group".}
+
 \item{participants_file}{Path to the CSV file containing participants' information. Defaults to a file within the package.}
 
 \item{costs_file}{Path to the CSV file containing costs' information. Defaults to a file within the package.}
-
-\item{pay_by}{A string specifying whether to divide costs by "group" or "individual". Defaults to "group".}
 }
 \value{
 A data frame containing the final payments for each person or group after minimizing the payments.

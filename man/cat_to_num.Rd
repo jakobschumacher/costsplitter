@@ -5,16 +5,20 @@
 \title{Change Categorical Values to Numeric}
 \usage{
 cat_to_num(
-  data_participants = read_participants(),
+  data = check_participants(),
+  age_adjustment = (1/18),
+  share_adult = 1,
+  share_kid = 0.5,
+  share_full = 1,
   share_reduced = 0.7,
-  adjustment_less = 0.8,
-  adjustment_more = 1.2
+  share_less = 0.8,
+  share_more = 1.2
 )
 }
 \arguments{
-\item{data_participants}{A dataframe containing the columns \code{share}, \code{adjustment}, and \code{age}.}
-
 \item{share_reduced}{A numeric value to assign when \code{share} is "reduced". Default is \code{0.7}.}
+
+\item{data_participants}{A dataframe containing the columns \code{share}, \code{adjustment}, and \code{age}.}
 
 \item{adjustment_less}{A numeric value to assign when \code{adjustment} is "less". Default is \code{0.8}.}
 
@@ -27,5 +31,6 @@ A dataframe with transformed values.
 This function converts categorical descriptive values in the columns \code{share}, \code{adjustment}, and \code{age} to numeric values.
 }
 \examples{
-data_participants <- cat_to_num()
+data_participants = check_participants()
+data_participants2 <- cat_to_num(data_participants)
 }

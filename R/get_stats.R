@@ -16,9 +16,9 @@
 #'
 #' @export
 #' @examples
-#' stats <- get_stats(read_participants())
+#' stats <- get_stats(check_participants())
 #'
-get_stats <- function(data_participants = read_participants()) {
+get_stats <- function(data_participants = check_participants()) {
   stats <- list()
   stats$adults <- sum(data_participants$agegroup == "adult" , na.rm = TRUE)
   stats$children <- sum(data_participants$agegroup == "kid", na.rm = TRUE)

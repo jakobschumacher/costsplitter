@@ -2,5 +2,10 @@
 
 data_participants <- cat_to_num()
 testthat::test_that("The function change categorical to numeric works fine", {
-  testthat::expect_equal(is.numeric(data_participants$adjustment), TRUE)
+  testthat::expect_type(data_participants$age, "double")
+  testthat::expect_type(data_participants$adjustment, "double")
+  testthat::expect_type(data_participants$share, "double")
+  testthat::expect_false(all(is.na(data_participants$share)))
+  testthat::expect_false(all(is.na(data_participants$adjustment)))
+  testthat::expect_false(all(is.na(data_participants$age)))
 })
