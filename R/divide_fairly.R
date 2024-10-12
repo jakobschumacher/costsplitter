@@ -28,7 +28,7 @@ divide_fairly <- function(participants_file = system.file("participants.csv", pa
 
   # Reading in the data
   data_participants <- read_participants() |> 
-    change_categorical_to_numeric() |> 
+    cat_to_num() |> 
     divide_costs()
   data_costs <- read_costs()
   

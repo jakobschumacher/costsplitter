@@ -31,7 +31,8 @@ fusen::fill_description(
              email = "jakob.schumacher@web.de", 
              role = c("aut", "cre"), 
              comment = c(ORCID = "0000-0000-0000-0000"))
-    )
+    ),
+    URL: "http://jakobschumacher.github.io/dividefairly"
   ),
   overwrite = TRUE
 )
@@ -47,7 +48,9 @@ See `vignette("share-on-a-github-website", package = "fusen")` for more informat
 ```{r, eval=FALSE}
 # _All-in-one share of your package and its documentation on GitHub
 # usethis::create_github_token()
-# fusen::init_share_on_github()
+fusen::init_share_on_github()
+
+pkgdown::build_site()
 ```
 
 

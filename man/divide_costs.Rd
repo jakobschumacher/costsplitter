@@ -4,14 +4,10 @@
 \alias{divide_costs}
 \title{Divide Costs Based on Weighted Factors}
 \usage{
-divide_costs(
-  data_participants = change_categorical_to_numeric(read_participants())
-)
+divide_costs(data_participants = cat_to_num(read_participants()))
 }
 \arguments{
 \item{data_participants}{A dataframe containing the columns \code{agegroup}, \code{age}, \code{adjustment}, and \code{share}. Default is \code{data_participants}.}
-
-\item{cost}{The total cost to be divided among individuals. Default is \code{5500}.}
 }
 \value{
 A dataframe with an additional column \code{costs_produced}, representing the calculated cost each individual needs to pay based on their weight.

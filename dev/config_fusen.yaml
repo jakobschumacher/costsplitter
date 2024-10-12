@@ -2,7 +2,7 @@ flat_money_transfer.Rmd:
   path: dev/flat_money_transfer.Rmd
   state: active
   R:
-  - R/change_categorical_to_numeric.R
+  - R/cat_to_num.R
   - R/divide_costs.R
   - R/divide_fairly.R
   - R/get_stats.R
@@ -12,7 +12,7 @@ flat_money_transfer.Rmd:
   tests:
   - tests/testthat/test-read_costs.R
   - tests/testthat/test-read_participants.R
-  - tests/testthat/test-change_categorical_to_numeric.R
+  - tests/testthat/test-cat_to_num.R
   - tests/testthat/test-get_stats.R
   - tests/testthat/test-divide_costs.R
   - tests/testthat/test-minimize_payments.R

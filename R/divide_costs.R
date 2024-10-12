@@ -5,7 +5,6 @@
 #' This function calculates how much each individual should pay, based on various weighted factors such as age group, adjustment, and presence.
 #'
 #' @param data_participants A dataframe containing the columns `agegroup`, `age`, `adjustment`, and `share`. Default is `data_participants`.
-#' @param cost The total cost to be divided among individuals. Default is `5500`.
 #'
 #' @return A dataframe with an additional column `costs_produced`, representing the calculated cost each individual needs to pay based on their weight.
 #' @details The function computes a `weight` for each individual based on:
@@ -18,7 +17,7 @@
 #' @export
 #' @examples
 #' data_participants <- divide_costs()
-divide_costs <- function(data_participants = read_participants() |> change_categorical_to_numeric()) {
+divide_costs <- function(data_participants = read_participants() |> cat_to_num()) {
   data_participants |> 
     dplyr::mutate(weight = 1) |> 
     dplyr::mutate(weight = dplyr::case_when(

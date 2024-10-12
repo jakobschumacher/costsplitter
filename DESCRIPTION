@@ -1,9 +1,9 @@
 Package: dividefair
 Title: Divide Costs Fairly Amongst Friends
-Version: 0.1
+Version: 0.5
 Authors@R: 
     person("Jakob", "Schumacher", , "jakob.schumacher@web.de", role = c("aut", "cre"),
-           comment = c(ORCID = "0000-0000-0000-0000"))
+           comment = c(ORCID = "0000-0002-9894-6085"))
 Description: Do the accounting of a group trip.
 License: GPL (>= 3)
 Imports: 
@@ -17,8 +17,7 @@ Suggests:
     knitr,
     rmarkdown,
     testthat
-VignetteBuilder: 
-    knitr
+VignetteBuilder: knitr
 Config/fusen/version: 0.6.0
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
