@@ -21,15 +21,14 @@
 #' @import dplyr tidyr
 #' @export
 #' @examples
-#' result <- divide_fairly(pay_by = "group")
-divide_fairly <- function(participants_df = check_participants(), 
-                          costs_df = check_costs(),
+#' result <- costsplitter(pay_by = "group")
+costsplitter <- function(participants_df = readr::read_csv(system.file("participants.csv", package = "costsplitter")), 
                           pay_by = "group"){
 
   # Reading in the data
   data_participants <- participants_df |> 
+    check_participants()  |> 
     cat_to_num() 
-  data_costs <- check_costs()
   
   # Calculate the weights
   data_participants <- data_participants |> 

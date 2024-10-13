@@ -9,6 +9,8 @@ editor_options:
 # Keep eval=FALSE to avoid infinite loop in case you hit the knit button
 # Execute in the console directly
 fusen::inflate(flat_file = "dev/flat_money_transfer.Rmd", vignette_name = "Divide costs fairly amongst friends", overwrite = TRUE, clean = TRUE)
+
+
 ```
 
 
@@ -20,7 +22,7 @@ fusen::inflate(flat_file = "dev/flat_money_transfer.Rmd", vignette_name = "Divid
 fusen::fill_description(
   pkg = here::here(),
   fields = list(
-    Title = "Divide costs fairly amongst friends",
+    Title = "Split costs fairly amongst friends",
     Version = 0.1,
     Description = "Do the accounting of a group trip.",
     `Authors@R` = c(
@@ -29,7 +31,7 @@ fusen::fill_description(
              role = c("aut", "cre"), 
              comment = c(ORCID = "0000-0000-0000-0000"))
     ),
-    URL: "http://jakobschumacher.github.io/dividefairly"
+    URL: "http://jakobschumacher.github.io/costsplitter"
   ),
   overwrite = TRUE
 )

@@ -5,8 +5,6 @@ editor_options:
   chunk_output_type: console
 ---
 
-
-
 # This is the documentation of all functions of the package
 
 ```{r development-dataset}
@@ -25,6 +23,7 @@ This is a helper function that reads in the data from the participant file.
 #'
 #' This function reads cost data from a dataset and checks if it works for the pourpose of this package.
 #'
+#' 
 #' @param cost_df A character string specifying data. Defaults to the read.csv(system.file("costs.csv", package = "costsplitter")), which is the file included in the costsplitter package.
 #'
 #' @return A tibble containing the cost data read from the CSV file.
@@ -52,6 +51,7 @@ check_costs <- function(cost_df = read.csv(system.file("costs.csv", package = "c
   # Return data
   return(tibble(cost_df))
 }
+
 ```
 
 ```{r example-check_costs}
@@ -61,7 +61,7 @@ data_costs <- costsplitter::check_costs()
 ```{r test-check_costs}
 example_costs <- data.frame(
   id = c(10, 10, 4, 12, 4),
-  name = c("Charlotte Brown", "Charlotte Brown", "Amelia Taylor", "Mia Davis", "Amelia Taylor"),
+  name = c("Charlotte Brown", "Charlotte Brown",  "Amelia Taylor", "Mia Davis",  "Amelia Taylor"),
   group = c("Brown", "Brown", "Smith", "Davis", "Smith"),
   unit = c("day1", "day2", "day3", "dinnerday1", "day1"),
   cost = c(400, 900, 800, 320, 400)
@@ -543,14 +543,13 @@ testthat::test_that("The function divide costs works properly with internal data
 #'
 #' @import dplyr tidyr
 #' @export
-costsplitter <- function(participants_df = check_participants(), 
-                          costs_df = check_costs(),
+costsplitter <- function(participants_df = readr::read_csv(system.file("participants.csv", package = "costsplitter")), 
                           pay_by = "group"){
 
   # Reading in the data
   data_participants <- participants_df |> 
+    check_participants()  |> 
     cat_to_num() 
-  data_costs <- check_costs()
   
   # Calculate the weights
   data_participants <- data_participants |> 

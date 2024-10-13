@@ -2,7 +2,6 @@
 % Please edit documentation in R/costsplitter-package.R
 \docType{package}
 \name{costsplitter-package}
-\alias{costsplitter}
 \alias{costsplitter-package}
 \title{costsplitter: Divide Costs Fairly Amongst Friends}
 \description{

@@ -2,7 +2,7 @@
 
 example_costs <- data.frame(
   id = c(10, 10, 4, 12, 4),
-  name = c("Charlotte Brown", "Charlotte Brown", "Amelia Taylor", "Mia Davis", "Amelia Taylor"),
+  name = c("Charlotte Brown", "Charlotte Brown",  "Amelia Taylor", "Mia Davis",  "Amelia Taylor"),
   group = c("Brown", "Brown", "Smith", "Davis", "Smith"),
   unit = c("day1", "day2", "day3", "dinnerday1", "day1"),
   cost = c(400, 900, 800, 320, 400)
