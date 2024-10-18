@@ -36,8 +36,7 @@ This is a helper function that reads in the data from the participant file
 #' @return A message indicating whether the dataset conforms to `costsplitter` prerequisites.
 #'         Stops execution if the dataset does not conform.
 #' @export
-check_costsplitter_data <- function(data = readr::read_csv(system.file("participants.csv", package = "costsplitter"), show_col_types = FALSE), 
-                                    var_pay = "pay_", 
+check_costsplitter_data <- function(var_pay = "pay_", 
                                     var_share = "share_",
                                     value_full = 1, 
                                     value_reduced = 0.8, 
@@ -59,13 +58,7 @@ check_costsplitter_data <- function(data = readr::read_csv(system.file("particip
     stop("At least one 'pay_' column must be present.")
   }
 
-  # Validate 'pay_' columns (should be numeric)
-  for (pay_col in pay_cols) {
-    if (!is.numeric(data[[pay_col]])) {
-      stop(paste("The '", pay_col, "' column must be numeric.", sep = ""))
-    }
-  }
-
+  
     # Get all 'share_' columns
   share_cols <- data %>%
     select(starts_with(var_share)) %>%
@@ -414,11 +407,15 @@ testthat::test_that("The function divide costs works properly with internal data
 #' @import dplyr tidyr
 #' @export
 costsplitter <- function(data = readr::read_csv(system.file("participants.csv", package = "costsplitter"), show_col_types = FALSE), 
-                         pay_by = "individual"){
+                         pay_by = "individual", 
+                         ...){
 
     # Reading in the data
-    data <- readr::read_csv(system.file("participants.csv", package = "costsplitter"), show_col_types = FALSE) |>
-        check_costsplitter_data() |> 
+        data <- data |>
+        tibble() |>
+        mutate(across(starts_with("share_"), as.character)) |>
+        mutate(across(starts_with("age"), as.character)) |>
+        check_costsplitter_data()   
         cat_to_num() |>
         dplyr::mutate(across(starts_with("cost_"), ~ . * .data$age * .data$adjustment)) 
 

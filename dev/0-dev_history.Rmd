@@ -49,7 +49,6 @@ See `vignette("share-on-a-github-website", package = "fusen")` for more informat
 # usethis::create_github_token()
 fusen::init_share_on_github()
 
-pkgdown::build_site()
 ```
 
 
