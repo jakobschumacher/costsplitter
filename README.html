@@ -604,8 +604,8 @@ padding-top: 0px;
 <h1 id="whats-this-package-costsplitter-about">What’s this package
 <code>costsplitter</code> about?</h1>
 <p>The package <code>costsplitter</code> is an R package designed to
-simplify the complex task of splitting costs for group activities. While
-evenly dividing expenses among participants is straightforward in many
+simplify the task of splitting costs for group activities. While evenly
+dividing expenses among participants is straightforward in many
 situations, real-world scenarios often require a more nuanced approach.
 The package <code>costsplitter</code> addresses various factors that can
 complicate cost-sharing:</p>
@@ -623,48 +623,48 @@ circumstances. Whether you’re planning a hiking trip, shared vacation,
 or any group event with shared costs, <code>costsplitter</code> offers a
 sophisticated solution to the often challenging task of equitable
 expense allocation.</p>
-<h1 id="installation">Installation</h1>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="co"># Install the package from github</span></span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>devtools<span class="sc">::</span><span class="fu">install_github</span>(github.com<span class="sc">/</span>jakobschumacher<span class="sc">/</span>costsplitter)</span></code></pre></div>
-<h1 id="step-1-prepare-the-data">Step 1: Prepare the data</h1>
 <p>So you are convinced that this package is something for you? You want
 to give it a try? Go ahead. Follow the following steps to divide the
 costs of an activity fair amongst all participants</p>
-<p>First <strong>prepare the input files</strong>. This is the tricky
-part of the undertaking. You need to have your data in a correct format,
+<h2 id="step-1-installation">Step 1: Installation</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="co"># Install the package from github</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>devtools<span class="sc">::</span><span class="fu">install_github</span>(github.com<span class="sc">/</span>jakobschumacher<span class="sc">/</span>costsplitter)</span></code></pre></div>
+<h2 id="step-2-prepare-the-data">Step 2: Prepare the data</h2>
+<p><strong>Prepare the input files</strong>. This is the tricky part of
+the undertaking. You need to have your data in a correct format,
 otherwise the function will not work correctly. Use a spreadsheet that
 can also be helpful during the planning of the group activity. The data
 should conatin the following columns:</p>
 <blockquote>
 <p>The <code>name</code> column. This column indicates the names of the
-person involved. This is a must have column otherwise the package will
+persons involved. This is a must have column otherwise the package will
 throw an error. The names must be unique.</p>
 </blockquote>
 <blockquote>
 <p>The <code>pay_</code> columns. These columns hold the amount that
 somebody paid for one activity. At least one <code>pay_</code> column
-must be available. All <code>pay_</code> columns should either start
-with <code>pay_</code> or a string given by <code>var_pay</code>. For
-everything slightly more complicated you want to match the
-<code>pay_</code>column with the <code>share_</code>columns. This must
-be done by a corresponding part after the <code>_</code>
-e.g. <code>pay_breakfast</code>and <code>share_breakfast</code>. The
-value should be numeric.</p>
+must be available. Each <code>pay_</code>column must match with one
+<code>share_</code>column. This must be done by a corresponding part
+after the <code>_</code> e.g. <code>pay_breakfast</code>and
+<code>share_breakfast</code>. The value should be numeric. All
+<code>pay_</code> columns should either start with <code>pay_</code> or
+a string given by <code>var_pay</code>.</p>
 </blockquote>
 <blockquote>
 <p>The <code>share_</code>columns. These columns hold the share that
-everyone has to pay for the activity. All <code>share_</code> columns
-should either start with <code>share_</code> or a string given by
-<code>var_share</code>. The second part of the name after the
-<code>_</code> must correspond to the <code>pay_</code>column. The value
-can be numeric between 0 (meaning does not hove to pay) and 1 (pays his
-full share) and they can also hold categorical values <code>full</code>
-or <code>reduced</code> or <code>half</code> or <code>some</code>. These
+everyone has to pay for the activity. The second part of the name after
+the <code>_</code> must correspond to one <code>pay_</code>column. The
+value can be numeric. It must be between 0 (meaning the person does not
+hove to pay) and 1 (meaning the person does have to pay a full share) or
+it can have one of the following categorical values <code>full</code>,
+<code>reduced</code>, <code>half</code> or <code>some</code>. These
 categorical values will be transformed to numerical values. The
 corresponding value can be controlled with the function arguments
 <code>value_full</code>, <code>value_reduced</code>,
 <code>value_half</code> or <code>value_some</code> respectively. NA
-values and empty values will be translated into 0.</p>
+values and empty values will be translated into 0. All
+<code>share_</code> columns should either start with <code>share_</code>
+or a string given by <code>var_share</code>.</p>
 </blockquote>
 <blockquote>
 <p>The <code>group</code> column. Several persons can be put together to
@@ -680,12 +680,12 @@ NA values and empty values will be translated into 1.</p>
 <blockquote>
 <p>The <code>adjustment</code> column. To give a general bonus or malus
 that will apply the complete amount somebody has to pay you can use the
-adjustment column. This column can be numeric between 0 (indicating no
-pay) and 100 (indicating 100x times the normal share). The value can
-also be categorical with <code>more</code> indicating that the person
-should pay 1.2 times more and <code>less</code> indicating that the
-person should pay only 0.8 of the usual amount. NA values and empty
-values will be translated into 1.</p>
+adjustment column. This column can be numeric between 0 (indicating the
+person does not have to pay) and 100 (indicating 100x times the normal
+share). The value can also be categorical with <code>more</code>
+indicating that the person should pay 1.2 times more and
+<code>less</code> indicating that the person should pay only 0.8 of the
+usual amount. NA values and empty values will be translated into 1.</p>
 </blockquote>
 <p>Here is an example of a suitable dataset.</p>
 <table>
@@ -764,7 +764,7 @@ values will be translated into 1.</p>
 </tr>
 </tbody>
 </table>
-<h1 id="step-2-do-the-analysis">Step 2: Do the analysis</h1>
+<h2 id="step-3-do-the-analysis">Step 3: Do the analysis</h2>
 <p>This is the easy part. If the input files are in structured in the
 right way, all you need to do is run:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="co"># Load the package</span></span>
@@ -777,23 +777,9 @@ right way, all you need to do is run:</p>
 <span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="fu">costsplitter</span>(data)</span></code></pre></div>
 <p>What this will do is: It reads in the files, checks if the files are
 structured in the right way, changes categorical values into numerical
-values, it calculates a weight based on the age, adjustment and the
+values, then it calculates a weight based on the age, adjustment and the
 grade of involvement. In the end it gives out the amount that everybody
 needs to pay and whom the money should be paid.</p>
-<p>Here is an example of an analysis where many features are
-controlled</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># Load the package</span></span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">library</span>(costsplitter)</span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a></span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co"># Read in the data</span></span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">&#39;your_data_set.csv&#39;</span>)</span>
-<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a></span>
-<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co"># Do the analysis</span></span>
-<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="fu">costsplitter</span>(data,</span>
-<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>    <span class="at">var_share =</span> <span class="st">&quot;payindicator_&quot;</span>, <span class="co"># Replacing the *share_* to *payindicator_*</span></span>
-<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>    <span class="at">use_adjustment =</span> <span class="cn">FALSE</span>, <span class="co"># Explicitly state that no adjustment should be used</span></span>
-<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>    <span class="at">use_age =</span> <span class="cn">TRUE</span>, <span class="co"># Explicitly stating that age should be used</span></span>
-<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>    <span class="at">value_kid =</span> <span class="fl">0.8</span>) <span class="co"># Setting the percentage what kids should pay</span></span></code></pre></div>
 
 </body>
 </html>

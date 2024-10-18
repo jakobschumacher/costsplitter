@@ -6,80 +6,88 @@
 #' It reads the participants' and costs' data from files, calculates the total costs for each participant or group,
 #' and returns the amounts to be paid after applying any payments that have already been made.
 #'
-#' @param participants_file Path to the CSV file containing participants' information. Defaults to a file within the package.
-#' @param costs_file Path to the CSV file containing costs' information. Defaults to a file within the package.
+#' @param data The dataset 
 #' @param pay_by A string specifying whether to divide costs by "group" or "individual". Defaults to "group".
 #'
 #' @return A data frame containing the final payments for each person or group after minimizing the payments.
 #'
-#' @details
-#' The function starts by reading the participants and costs data. It calculates the total costs and
-#' distributes them based on the participants' weights. It also considers the payments already made.
-#' Depending on the `pay_by` argument, costs are divided either by group or by individual. The final step
-#' involves minimizing the payments using the `minimize_payments` function.
 #'
 #' @import dplyr tidyr
 #' @export
 #' @examples
 #' result <- costsplitter(pay_by = "group")
-costsplitter <- function(participants_df = readr::read_csv(system.file("participants.csv", package = "costsplitter")), 
-                          pay_by = "group"){
+costsplitter <- function(data = readr::read_csv(system.file("participants.csv", package = "costsplitter"), show_col_types = FALSE), 
+                         pay_by = "individual"){
 
-  # Reading in the data
-  data_participants <- participants_df |> 
-    check_participants()  |> 
-    cat_to_num() 
-  
-  # Calculate the weights
-  data_participants <- data_participants |> 
-    dplyr::mutate(weight = adjustment * share * age) 
-  
-  
-  # Doing first calculations
-  total_costs <- sum(data_costs$cost)
-  total_weights <- sum(data_participants$weight)
-  cost_per_weight <- total_costs / total_weights
-  
-  # Calculate costs_produced
-  data_participants <- data_participants |> 
-    dplyr::mutate(costs_produced = weight * cost_per_weight) 
-  
-  # Summarise and add the costs
-  if (pay_by == "group") {
-    df <- data_participants |> 
-      dplyr::group_by(group) |> 
-      dplyr::summarise(costs_produced = sum(costs_produced))|> 
-      dplyr::left_join(
-        data_costs |> 
-          dplyr::group_by(group) |> 
-          dplyr::summarise(payed = sum(cost)),
-        by = "group"
-      ) |> 
-      dplyr::mutate(payed = tidyr::replace_na(payed, 0)) |> 
-      dplyr::mutate(to_pay_unrounded = costs_produced - payed) |> 
-      dplyr::mutate(to_pay = round(to_pay_unrounded / 5) * 5) |> 
-      dplyr::mutate(person = group)
-  } else if (pay_by == "individual") {
-    df <- data_participants |> 
-      dplyr::group_by(id) |> 
-      dplyr::summarise(costs_produced = sum(costs_produced))|> 
-      dplyr::left_join(
-        data_costs |> 
-          dplyr::group_by(id) |> 
-          dplyr::summarise(payed = sum(cost)),
-        by = "id"
-      ) |> 
-      dplyr::mutate(payed = tidyr::replace_na(payed, 0)) |> 
-      dplyr::mutate(to_pay_unrounded = costs_produced - payed) |> 
-      dplyr::mutate(to_pay = round(to_pay_unrounded / 5) * 5) |> 
-      dplyr::mutate(person = as.character(id))
-  }
-  
-  # Apply the minimize_payment function
-  results <- minimize_payments(df |> dplyr::select(person, to_pay))
-  
-  return(results)
+    # Reading in the data
+    data <- readr::read_csv(system.file("participants.csv", package = "costsplitter"), show_col_types = FALSE) |>
+        check_costsplitter_data() |> 
+        cat_to_num() |>
+        dplyr::mutate(across(starts_with("cost_"), ~ . * .data$age * .data$adjustment)) 
+
+    # Split the dataset into participants data and a dataset showing what everybody paid
+    data_participants <- data |> 
+        dplyr::select(.data$name, .data$group, dplyr::starts_with("cost_")) |>
+        tidyr::pivot_longer(cols = dplyr::starts_with("cost_"), names_to = "activity", values_to = "costs") |>
+        dplyr::mutate(activity = stringr::str_split_i(.data$activity, pattern = "_", 2))
+
+    data_costs <- dplyr::left_join(
+        names(data) |> 
+            stringr::str_subset("^cost_") |> 
+            purrr::map_dfr(~ data |> 
+                dplyr::summarise(activity = .x, total_units = sum(.data[[.x]], na.rm = TRUE))) |>
+            dplyr::mutate(activity = stringr::str_remove(.data$activity, "^cost_")),
+        names(data) |> 
+            stringr::str_subset("^pay_") |>
+            purrr::map_dfr(~ data |> 
+                dplyr::summarise(activity = .x, total_payed = sum(.data[[.x]], na.rm = TRUE))) |>
+            dplyr::mutate(activity = stringr::str_remove(.data$activity, "^pay_")), by = "activity"
+    ) |> 
+    dplyr::mutate(cost_per_unit = .data$total_payed / .data$total_units) |>
+    dplyr::select(.data$activity, .data$cost_per_unit)
+
+    # Combine the dataset
+    data_topay <- data_participants |>
+        dplyr::left_join(data_costs, by = "activity") |>
+        dplyr::mutate(topay = .data$costs * .data$cost_per_unit)
+
+    # Get the data_topay and data_recieves
+    data_topay <- if(pay_by == "group"){
+        data_topay |>
+            dplyr::group_by(.data$group) |>
+            dplyr::summarise(to_pay = sum(.data$topay)) |>
+            dplyr::rename(element = .data$group)
+    } else {
+        data_topay |>
+            dplyr::group_by(.data$name) |>
+            dplyr::summarise(to_pay = sum(.data$topay)) |>
+            dplyr::rename(element = .data$name)
+    }
+
+    data_recieves <- if(pay_by == "group"){
+        data |>
+            dplyr::select(.data$group, dplyr::starts_with("pay_")) |>
+            tidyr::pivot_longer(cols = dplyr::starts_with("pay"), names_to = "activity", values_to = "payed") |>
+            dplyr::group_by(.data$group) |>
+            dplyr::summarise(recieves = sum(.data$payed, na.rm = TRUE)) |>
+            dplyr::rename(element = .data$group)
+    } else {
+        data |>
+            dplyr::select(.data$name, dplyr::starts_with("pay_")) |>
+            tidyr::pivot_longer(cols = dplyr::starts_with("pay"), names_to = "activity", values_to = "payed") |>
+            dplyr::group_by(.data$name) |>
+            dplyr::summarise(recieves = sum(.data$payed, na.rm = TRUE)) |>
+            dplyr::rename(element = .data$name)
+    }
+
+    # Combine the data again
+    data_tosplit <- data_topay |> 
+        dplyr::left_join(data_recieves, by = "element") |>
+        dplyr::mutate(to_pay = .data$to_pay - .data$recieves) |>
+        dplyr::select(.data$element, .data$to_pay)
+
+    # Apply the minimization function from above
+    results <- minimize_payments(data_tosplit) 
+
+    return(results)
 }
-
-
-

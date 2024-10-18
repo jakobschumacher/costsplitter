@@ -23,8 +23,8 @@
 #' @export
 #' @examples
 #'
-#' df <- data.frame(
-#'   person = c("Brown", "Smith", "Fisher", "Taylor", "Davis", "Johnson", "Wilson", "ORally"),
+#' df <- dplyr::tibble(
+#'   element = c("Brown", "Smith", "Fisher", "Taylor", "Davis", "Johnson", "Wilson", "ORally"),
 #'   to_pay = c(-995, -125, -80,  210, 245, 300, 365, 80)
 #' )
 #'
@@ -33,11 +33,11 @@
 # Function to calculate payments
 minimize_payments <- function(df) {
   # Separate into payers and receivers
-  payers <- df %>% filter(to_pay > 0) %>% dplyr::arrange(desc(to_pay))
-  receivers <- df %>% filter(to_pay < 0) %>% dplyr::arrange(to_pay)
+  payers <- df %>% filter(.data$to_pay > 0) %>% dplyr::arrange(desc(.data$to_pay))
+  receivers <- df %>% filter(.data$to_pay < 0) %>% dplyr::arrange(.data$to_pay)
   
   # Initialize result data frame to store who pays whom
-  payments <- tibble(payer = character(), receiver = character(), amount = numeric())
+  payments <- dplyr::tibble(payer = character(), receiver = character(), amount = numeric())
   
   # Step 1: Settle exact matches first
   i <- 1
@@ -46,7 +46,7 @@ minimize_payments <- function(df) {
       if (payers$to_pay[i] == abs(receivers$to_pay[j])) {
         # Record the exact match payment
         payments <- payments %>%
-          add_row(payer = payers$person[i], receiver = receivers$person[j], amount = payers$to_pay[i])
+          add_row(payer = payers$element[i], receiver = receivers$element[j], amount = payers$to_pay[i])
         
         # Remove the matched payer and receiver
         payers <- payers[-i,]
@@ -69,7 +69,7 @@ minimize_payments <- function(df) {
     
     # Record the payment
     payments <- payments %>%
-      add_row(payer = payers$person[i], receiver = receivers$person[j], amount = pay_amount)
+      add_row(payer = payers$element[i], receiver = receivers$element[j], amount = pay_amount)
     
     # Adjust balances
     payers$to_pay[i] <- payers$to_pay[i] - pay_amount

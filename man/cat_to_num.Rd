@@ -2,10 +2,10 @@
 % Please edit documentation in R/cat_to_num.R
 \name{cat_to_num}
 \alias{cat_to_num}
-\title{Change Categorical Values to Numeric}
+\title{Convert Categorical Values to Numeric}
 \usage{
 cat_to_num(
-  data = check_participants(),
+  data = check_costsplitter_data(),
   age_adjustment = (1/18),
   share_adult = 1,
   share_kid = 0.5,
@@ -16,21 +16,41 @@ cat_to_num(
 )
 }
 \arguments{
-\item{share_reduced}{A numeric value to assign when \code{share} is "reduced". Default is \code{0.7}.}
+\item{data}{A data frame, typically the output of \code{check_costsplitter_data()}, containing the cost and participant information.
+Defaults to \code{check_costsplitter_data()} if not provided.}
 
-\item{data_participants}{A dataframe containing the columns \code{share}, \code{adjustment}, and \code{age}.}
+\item{age_adjustment}{A numeric value used to scale age values to proportions. Default is \code{1/18}.}
 
-\item{adjustment_less}{A numeric value to assign when \code{adjustment} is "less". Default is \code{0.8}.}
+\item{share_adult}{A numeric value indicating the proportion for adults. Default is \code{1}.}
 
-\item{adjustment_more}{A numeric value to assign when \code{adjustment} is "more". Default is \code{1.2}.}
+\item{share_kid}{A numeric value indicating the proportion for kids. Default is \code{0.5}.}
+
+\item{share_full}{A numeric value representing the full share for participants. Default is \code{1}.}
+
+\item{share_reduced}{A numeric value representing the reduced share for participants. Default is \code{0.7}.}
+
+\item{share_less}{A numeric value representing a discounted share applied to participants with the "less" category. Default is \code{0.8}.}
+
+\item{share_more}{A numeric value representing an increased share applied to participants with the "more" category. Default is \code{1.2}.}
 }
 \value{
-A dataframe with transformed values.
+A data frame with transformed numeric values for age, adjustment, and other relevant columns.
 }
 \description{
-This function converts categorical descriptive values in the columns \code{share}, \code{adjustment}, and \code{age} to numeric values.
+This function converts various categorical values within the dataset to numeric values,
+particularly for cost shares and age adjustments, as per the parameters provided.
+It processes specific columns like age and adjustment to create numeric equivalents,
+enabling further analysis and computation within the \code{costsplitter} package.
+}
+\details{
+The function handles several transformations:
+\itemize{
+\item Categorical values in cost columns (e.g., "full", "reduced") are converted to numeric.
+\item Age values are translated based on adult and kid patterns in both English and German.
+\item The adjustment column is converted to numeric based on predefined categories like "more" and "less."
+}
 }
 \examples{
-data_participants = check_participants()
-data_participants2 <- cat_to_num(data_participants)
+data_participants = check_costsplitter_data() |> cat_to_num()
+
 }

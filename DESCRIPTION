@@ -8,11 +8,11 @@ Description: Do the accounting of a group trip.
 License: GPL (>= 3)
 Imports: 
     dplyr,
-    glue,
-    janitor,
     magrittr,
+    purrr,
     readr,
     rlang,
+    stringr,
     tidyr
 Suggests: 
     knitr,

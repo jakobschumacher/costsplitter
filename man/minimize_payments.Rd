@@ -29,8 +29,8 @@ The function separates the input data frame into payers (persons with positive b
 }
 \examples{
 
-df <- data.frame(
-  person = c("Brown", "Smith", "Fisher", "Taylor", "Davis", "Johnson", "Wilson", "ORally"),
+df <- dplyr::tibble(
+  element = c("Brown", "Smith", "Fisher", "Taylor", "Davis", "Johnson", "Wilson", "ORally"),
   to_pay = c(-995, -125, -80,  210, 245, 300, 365, 80)
 )
 

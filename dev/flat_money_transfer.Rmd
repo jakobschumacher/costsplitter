@@ -16,285 +16,190 @@ pkgload::load_all(path = here::here(), export_all = FALSE)
 ```
 
 
-## Function to read costs file
-This is a helper function that reads in the data from the participant file.
-```{r function-check_costs}
-#' Read and check cost data 
+## Function to check the costsplitter data
+This is a helper function that reads in the data from the participant file
+```{r function-check_costsplitter_data}
+#' Check the dataset for conformity with costsplitter prerequisites
 #'
-#' This function reads cost data from a dataset and checks if it works for the pourpose of this package.
+#' This function checks whether a given dataset conforms to the expected format and requirements
+#' of the `costsplitter` package. It ensures the presence and validity of required columns such
+#' as `name`, `pay_`, `share_`, `group`, `age`, and `adjustment`.
 #'
-#' 
-#' @param cost_df A character string specifying data. Defaults to the read.csv(system.file("costs.csv", package = "costsplitter")), which is the file included in the costsplitter package.
+#' @param data A data frame containing the cost-sharing data.
+#' @param var_pay A string indicating the prefix for payment columns (default is "pay_").
+#' @param var_share A string indicating the prefix for share columns (default is "share_").
+#' @param value_full A numeric value representing the full share (default is 1).
+#' @param value_reduced A numeric value representing the reduced share (default is 0.8).
+#' @param value_half A numeric value representing the half share (default is 0.5).
+#' @param value_some A numeric value representing the partial share (default is 0.3).
 #'
-#' @return A tibble containing the cost data read from the CSV file.
-#'
-#' @importFrom rlang abort
-#' @importFrom glue glue
-#'
+#' @return A message indicating whether the dataset conforms to `costsplitter` prerequisites.
+#'         Stops execution if the dataset does not conform.
 #' @export
-check_costs <- function(cost_df = read.csv(system.file("costs.csv", package = "costsplitter"))) {
+check_costsplitter_data <- function(data = readr::read_csv(system.file("participants.csv", package = "costsplitter"), show_col_types = FALSE), 
+                                    var_pay = "pay_", 
+                                    var_share = "share_",
+                                    value_full = 1, 
+                                    value_reduced = 0.8, 
+                                    value_half = 0.5, 
+                                    value_some = 0.3) {
   
-  # Assert that the required columns are present
-  required_columns <- c("name", "unit", "cost")
-  
-  missing_columns <- setdiff(required_columns, colnames(cost_df))
-  
-  if (length(missing_columns) > 0) {
-    rlang::abort(glue::glue("The following required columns are missing: {paste(missing_columns, collapse = ', ')}"))
-  }
-  
-  # Assert that 'cost' is numeric
-  if (!is.numeric(cost_df$cost)) {
-    rlang::abort("'cost' column must be numeric.")
+  # Check if 'name' column exists and is unique
+  if (!"name" %in% colnames(data)) {
+    stop("The 'name' column is missing.")
   }
 
-  # Return data
-  return(tibble(cost_df))
+  if (anyDuplicated(data$name)) {
+    stop("The 'name' column contains duplicate entries.")
+  }
+
+  # Check for at least one 'pay_' column
+  pay_cols <- grep(paste0("^", var_pay), colnames(data), value = TRUE)
+  if (length(pay_cols) == 0) {
+    stop("At least one 'pay_' column must be present.")
+  }
+
+  # Validate 'pay_' columns (should be numeric)
+  for (pay_col in pay_cols) {
+    if (!is.numeric(data[[pay_col]])) {
+      stop(paste("The '", pay_col, "' column must be numeric.", sep = ""))
+    }
+  }
+
+    # Get all 'share_' columns
+  share_cols <- data %>%
+    select(starts_with(var_share)) %>%
+    colnames()
+  
+
+  # Validate 'age' column
+  if ("age" %in% colnames(data)) {
+    age_values <- data$age
+    if (all(age_values %in% c(NA, "", "adult", "kid") | (is.numeric(age_values) & age_values <= 0 & age_values >= 120))) {
+      stop("The 'age' column must be a number between 0 and 120, or 'adult' or 'kid'.")
+    }
+  }
+
+  # Validate 'adjustment' column
+  if ("adjustment" %in% colnames(data)) {
+    adjustment_values <- data$adjustment
+    if (all(!(adjustment_values %in% c(NA, "", "more", "less")) | (is.numeric(adjustment_values) & adjustment_values <= 0 & adjustment_values >= 100))) {
+      stop("The 'adjustment' column must be a number between 0 and 100 or categorical ('more', 'less').")
+    }
+  }
+
+  return(data)
 }
 
 ```
 
-```{r example-check_costs}
-data_costs <- costsplitter::check_costs()
-```
 
-```{r test-check_costs}
-example_costs <- data.frame(
-  id = c(10, 10, 4, 12, 4),
-  name = c("Charlotte Brown", "Charlotte Brown",  "Amelia Taylor", "Mia Davis",  "Amelia Taylor"),
-  group = c("Brown", "Brown", "Smith", "Davis", "Smith"),
-  unit = c("day1", "day2", "day3", "dinnerday1", "day1"),
-  cost = c(400, 900, 800, 320, 400)
+```{r examples-check_costsplitter_data}
+library(dplyr)
+library(stringr)
+data <- data.frame(
+  name = c("Alice", "Bob", "Charlie"),
+  pay_breakfast = c(20, 0, 10),
+  share_breakfast = c(1, "half", "full"),
+  age = c(30, "kid", NA),
+  adjustment = c("more", NA, "less")
 )
 
+check_costsplitter_data(data)
+
+```
+
+```{r tests-check_costsplitter_data}
 library(testthat)
 
-test_that("check_costs works with valid data", {
-  data <- check_costs(data = example_costs)
-  
-  expect_true(all(c("name", "unit", "cost") %in% colnames(data)))
-  expect_true(is.numeric(data$cost))
-})
-
-test_that("check_costs throws error for missing required columns", {
-  # Create invalid data (remove 'cost' column)
-  invalid_data <- example_costs %>% select(-cost)
-  
-  expect_error(check_costs(data = invalid_data), "The following required columns are missing: cost")
-})
-
-test_that("check_costs throws error if cost is not numeric", {
-  # Create invalid data (change 'cost' to character)
-  invalid_data <- example_costs
-  invalid_data$cost <- as.character(invalid_data$cost)
-  
-  expect_error(check_costs(data = invalid_data), "'cost' column must be numeric")
-})
-
-```
-
-
-
-## Function to read the participants file
-This is a helper function that reads in the data from the participant file
-```{r function-check_participants}
-#' Read and Process Participant Data from CSV
-#'
-#' This function reads a CSV file containing participant data, cleans and processes it,
-#' and returns a tidy data frame. It allows for flexible column naming and handles
-#' various CSV structures.
-#'
-#' @param participants_df A string. The file path to the CSV file.
-#' @param var_id A string. The name of the ID column in the CSV (default: "id").
-#' @param var_age A string. The name of the age column in the CSV (default: "age").
-#' @param var_group A string. The name of the group column in the CSV (default: "group").
-#' @param var_adjustment A string. The name of the adjustment column in the CSV (default: "adjustment").
-#' @param indicator_costs A string. The prefix for cost columns in the CSV (default: "cost_").
-#' @param var_agegroup A string. The name of the age group column in the CSV (default: "agegroup").
-#' @param value_adults A string. The value to use for adult age groups (default: "adult").
-#' @param value_kids A string. The value to use for kid age groups (default: "kid").
-#'
-#' @return A tibble (data frame) containing the processed participant data.
-#'
-#' @details
-#' The function performs the following operations:
-#' 1. Reads the CSV file
-#' 2. Cleans column names
-#' 3. Renames columns based on user-provided names
-#' 4. Processes the age group column, categorizing into adults and kids
-#' 5. Pivots cost columns into a long format
-#'
-#'
-#' @import dplyr
-#' @import tidyr
-#' @import readr
-#' @import janitor
-#' @importFrom rlang sym
-#'
-#' @export
-check_participants <- function(participants_df = read.csv(system.file("participants.csv", package = "costsplitter")),
-                              var_name = "name",
-                              var_age = "age",
-                              var_group = "group",
-                              var_adjustment = "adjustment",
-                              indicator_costs = "cost_") {
-  
-  
-  # Assert that the provided columns exist in the data
-  if (!var_name %in% colnames(participants_df)) {
-    rlang::abort(glue::glue("Column '{var_name}' does not exist in the data. Please check the variable name."))
-  }
-  if (!var_age %in% colnames(participants_df)) {
-    rlang::abort(glue::glue("Column '{var_age}' does not exist in the data. Please check the variable name."))
-  }
-  if (!var_group %in% colnames(participants_df)) {
-    rlang::abort(glue::glue("Column '{var_group}' does not exist in the data. Please check the variable name."))
-  }
-  if (!var_adjustment %in% colnames(participants_df)) {
-    rlang::abort(glue::glue("Column '{var_adjustment}' does not exist in the data. Please check the variable name."))
-  }
-  
-  # Assert that indicator_costs is not empty
-  if (nchar(indicator_costs) == 0) {
-    rlang::abort("The 'indicator_costs' argument is empty. Please provide a valid prefix for cost columns.")
-  }
-  
-  # Rename columns based on user-provided names
-  participants_df <- participants_df %>%
-    rename(
-      name = all_of(var_name),
-      age = all_of(var_age),
-      group = all_of(var_group),
-      adjustment = all_of(var_adjustment)
-    )
-  
-  # Identify cost columns
-  cost_cols <- grep(paste0("^", indicator_costs), colnames(participants_df), value = TRUE)
-  
-    # Assert that there is at least one cost column
-  if (length(cost_cols) == 0) {
-    rlang::abort(glue::glue("No cost columns found with the prefix '{indicator_costs}'. Please check the prefix."))
-  }
-  
-  
-  # Pivot longer for cost columns
-  participants_df <- participants_df %>%
-    tidyr::pivot_longer(all_of(cost_cols), names_to = "cost_type", values_to = "share")
-  
-  return(participants_df)
-}
-
-```
-
-
-```{r examples-check_participants}
-data_participants <- check_participants()
-
-```
-
-```{r tests-check_participants}
-# Example data for testing
-example_data <- data.frame(
-  participant_name = c("Alice", "Bob", "Charlie"),
-  participant_age = c(25, 30, 22),
-  participant_group = c("Group1", "Group2", "Group1"),
-  participant_adjustment = c(0.9, 1.1, 1.0),
-  cost_food = c(10, 15, 20),
-  cost_transport = c(5, 7, 6)
-)
-
-
-testthat::test_that("check_participants renames columns correctly", {
-  data <- check_participants(
-    data = example_data,
-    var_name = "participant_name",
-    var_age = "participant_age",
-    var_group = "participant_group",
-    var_adjustment = "participant_adjustment",
-    indicator_costs = "cost_"
+test_that("Valid dataset passes checks", {
+  data <- data.frame(
+    name = c("Alice", "Bob", "Charlie"),
+    pay_breakfast = c(20, 0, 10),
+    share_breakfast = c(1, "half", "full"),
+    age = c(30, "kid", NA),
+    adjustment = c("more", NA, "less"),
+    stringsAsFactors = FALSE
   )
   
-  testthat::expect_true(all(c("name", "age", "group", "adjustment", "cost_type", "share") %in% colnames(data)))
+  expect_type(check_costsplitter_data(data), "list")
 })
 
-testthat::test_that("check_participants pivots cost columns", {
-  data <- check_participants(
-    data = example_data,
-    var_name = "participant_name",
-    var_age = "participant_age",
-    var_group = "participant_group",
-    var_adjustment = "participant_adjustment",
-    indicator_costs = "cost_"
+test_that("Missing 'name' column throws an error", {
+  data <- data.frame(
+    pay_breakfast = c(20, 0, 10),
+    share_breakfast = c(1, "half", "full")
   )
   
-  testthat::expect_equal(nrow(data), 6)  # 3 participants * 2 cost columns = 6 rows
-  testthat::expect_equal(data$cost_type[1], "cost_food")
-  testthat::expect_equal(data$cost_type[4], "cost_transport")
+  expect_error(check_costsplitter_data(data), "The 'name' column is missing.")
 })
 
-testthat::test_that("check_participants throws error for missing var_name", {
-  testthat::expect_error(
-    check_participants(
-      data = example_data,
-      var_name = "wrong_name",  # non-existent column
-      var_age = "participant_age",
-      var_group = "participant_group",
-      var_adjustment = "participant_adjustment",
-      indicator_costs = "cost_"
-    ),
-    "Column 'wrong_name' does not exist in the data"
+test_that("Duplicate 'name' values throw an error", {
+  data <- data.frame(
+    name = c("Alice", "Alice", "Charlie"),
+    pay_breakfast = c(20, 0, 10),
+    share_breakfast = c(1, "half", "full")
   )
+  
+  expect_error(check_costsplitter_data(data), "The 'name' column contains duplicate entries.")
 })
 
-testthat::test_that("check_participants throws error for missing cost prefix", {
-  testthat::expect_error(
-    check_participants(
-      data = example_data,
-      var_name = "participant_name",
-      var_age = "participant_age",
-      var_group = "participant_group",
-      var_adjustment = "participant_adjustment",
-      indicator_costs = "wrong_cost_"  # no columns with this prefix
-    ),
-    "No cost columns found with the prefix 'wrong_cost_'"
+test_that("At least one 'pay_' column is required", {
+  data <- data.frame(
+    name = c("Alice", "Bob", "Charlie"),
+    share_breakfast = c(1, "half", "full")
   )
+  
+  expect_error(check_costsplitter_data(data), "At least one 'pay_' column must be present.")
 })
 
-testthat::test_that("check_participants throws error for empty indicator_costs", {
-  testthat::expect_error(
-    check_participants(
-      data = example_data,
-      var_name = "participant_name",
-      var_age = "participant_age",
-      var_group = "participant_group",
-      var_adjustment = "participant_adjustment",
-      indicator_costs = ""
-    ),
-    "The 'indicator_costs' argument is empty"
+test_that("'pay_' columns must be numeric", {
+  data <- data.frame(
+    name = c("Alice", "Bob", "Charlie"),
+    pay_breakfast = c("twenty", 0, 10),
+    share_breakfast = c(1, "half", "full")
   )
+  
+  expect_error(check_costsplitter_data(data), "The 'pay_breakfast' column must be numeric.")
 })
-
 
 
 ```
 
 
 ## Function to change the categorical values to numerical values 
-This is a helper function that is used in the check_participants function. In the cost variables we accept categorical values. These categorical values need to be turned into numeric values 
+This is a helper function that is used in the check_costsplitter_data function. In the cost variables we accept categorical values. These categorical values need to be turned into numeric values 
 
 ```{r function-cat_to_num}
-#' Change Categorical Values to Numeric
+#' Convert Categorical Values to Numeric
 #'
-#' This function converts categorical descriptive values in the columns `share`, `adjustment`, and `age` to numeric values.
+#' This function converts various categorical values within the dataset to numeric values, 
+#' particularly for cost shares and age adjustments, as per the parameters provided. 
+#' It processes specific columns like age and adjustment to create numeric equivalents, 
+#' enabling further analysis and computation within the `costsplitter` package.
 #'
-#' @param data_participants A dataframe containing the columns `share`, `adjustment`, and `age`.
-#' @param share_reduced A numeric value to assign when `share` is "reduced". Default is `0.7`.
-#' @param adjustment_less A numeric value to assign when `adjustment` is "less". Default is `0.8`.
-#' @param adjustment_more A numeric value to assign when `adjustment` is "more". Default is `1.2`.
+#' @param data A data frame, typically the output of \code{check_costsplitter_data()}, containing the cost and participant information. 
+#' Defaults to \code{check_costsplitter_data()} if not provided.
+#' @param age_adjustment A numeric value used to scale age values to proportions. Default is \code{1/18}.
+#' @param share_adult A numeric value indicating the proportion for adults. Default is \code{1}.
+#' @param share_kid A numeric value indicating the proportion for kids. Default is \code{0.5}.
+#' @param share_full A numeric value representing the full share for participants. Default is \code{1}.
+#' @param share_reduced A numeric value representing the reduced share for participants. Default is \code{0.7}.
+#' @param share_less A numeric value representing a discounted share applied to participants with the "less" category. Default is \code{0.8}.
+#' @param share_more A numeric value representing an increased share applied to participants with the "more" category. Default is \code{1.2}.
+#' 
+#' @return A data frame with transformed numeric values for age, adjustment, and other relevant columns.
 #'
-#' @return A dataframe with transformed values.
+#' @details The function handles several transformations:
+#' \itemize{
+#'   \item Categorical values in cost columns (e.g., "full", "reduced") are converted to numeric.
+#'   \item Age values are translated based on adult and kid patterns in both English and German.
+#'   \item The adjustment column is converted to numeric based on predefined categories like "more" and "less."
+#' }
+#'
+#'
 #' @export
-cat_to_num <- function(data = check_participants(),
+cat_to_num <- function(data = check_costsplitter_data(),
                        age_adjustment = (1 / 18),
                        share_adult = 1,
                        share_kid = 0.5,
@@ -303,65 +208,64 @@ cat_to_num <- function(data = check_participants(),
                        share_less = 0.8, 
                        share_more = 1.2) {
   
+  # Convert shares to characters for case_when
+  share_reduced_character = as.character(share_reduced)
+  share_adult_character = as.character(share_adult * 18)
+  share_kid_character = as.character(share_kid * 18)
+  share_full_character = as.character(share_full)
+  share_less_character = as.character(share_less)
+  share_more_character = as.character(share_more)
   
   # Define patterns for adults and kids in both English and German
   adult_patterns <- tolower(c("adult", "adults", "erwachsene", "erwachsenen"))
   kid_patterns <- tolower(c("kid", "kids", "kind", "kinder"))
-  
-  # Keep in mind the case_when needs character on both sides. 
-  share_reduced_character = as.character(share_reduced)
-  share_adult_character = as.character(share_adult * 18 )
-  share_kid_character = as.character(share_kid * 18)
-  share_full_character = as.character(share_full)
-  share_reduced_character = as.character(share_reduced)
-  share_less_character = as.character(share_less)
-  share_more_character = as.character(share_more)
-  
-  # Change the categorical values to numerical values
-  data <- data %>%
+
+  data <- data |>
+    mutate(across(starts_with("cost_"), ~ as.numeric(case_when(
+      is.na(.) | . == "" ~ "0",
+      . == "full" ~ "1",
+      . == "reduced" ~ share_reduced_character,
+      TRUE ~ .
+    )))) |>
     # Age
     dplyr::mutate(age = dplyr::case_when(
-      is.na(age) | age == "" ~ "18",
-      age %in% adult_patterns ~ share_adult_character,
-      age %in% kid_patterns ~ share_kid_character,
-      TRUE ~ age 
+      is.na(.data$age) | .data$age == "" ~ "18",
+      .data$age %in% adult_patterns ~ share_adult_character,
+      .data$age %in% kid_patterns ~ share_kid_character,
+      TRUE ~ .data$age
     )) |> 
-    dplyr::mutate(age = as.numeric(age)) |> 
-    dplyr::mutate(age = round(age * age_adjustment, 2)) |> 
-    # Share
-    dplyr::mutate(share = dplyr::case_when(
-      is.na(share) | share == "" ~ "0",  
-      share == "full" ~ "1",
-      share == "reduced" ~ "0.7",
-      TRUE ~ share
-    )) |>
-    dplyr::mutate(share = as.numeric(share)) |> 
+    dplyr::mutate(age = as.numeric(.data$age)) |> 
+    dplyr::mutate(age = round(.data$age * age_adjustment, 2)) |>
     # Adjustment
     dplyr::mutate(adjustment = dplyr::case_when(
-      is.na(adjustment) | adjustment == "" ~ "1",
-      adjustment == "more" ~ share_more_character,
-      adjustment == "less" ~ share_less_character,
-      TRUE ~ adjustment
+      is.na(.data$adjustment) | .data$adjustment == "" ~ "1",
+      .data$adjustment == "more" ~ share_more_character,
+      .data$adjustment == "less" ~ share_less_character,
+      TRUE ~ .data$adjustment
     )) |>
-    dplyr::mutate(adjustment = as.numeric(adjustment)) 
+    dplyr::mutate(adjustment = as.numeric(.data$adjustment)) 
   
   return(data)
 }
 ```
 
 ```{r examples-cat_to_num}
-data_participants = check_participants()
-data_participants2 <- cat_to_num(data_participants)
+data_participants = check_costsplitter_data() |> cat_to_num()
+
 ```
 
 
 ```{r tests-cat_to_num}
-data_participants <- cat_to_num()
+data_participants <- check_costsplitter_data() |> cat_to_num()
 testthat::test_that("The function change categorical to numeric works fine", {
   testthat::expect_type(data_participants$age, "double")
+  testthat::expect_true(all(data_participants |> 
+    select(starts_with("cost")) |> 
+    purrr::map_lgl(is.double)))
+  testthat::expect_true(all(data_participants |> 
+    select(starts_with("pay")) |> 
+    purrr::map_lgl(is.double)))
   testthat::expect_type(data_participants$adjustment, "double")
-  testthat::expect_type(data_participants$share, "double")
-  testthat::expect_false(all(is.na(data_participants$share)))
   testthat::expect_false(all(is.na(data_participants$adjustment)))
   testthat::expect_false(all(is.na(data_participants$age)))
 })
@@ -369,49 +273,8 @@ testthat::test_that("The function change categorical to numeric works fine", {
 
 
 
-
-
-
-## Function to collect some basic stats 
-This function collects some basic stats about the activity and the participants
-```{r function-get_stats}
-#' Get Statistics on Participants
-#'
-#' This function calculates statistics regarding the number of adults, children, stays, and absences
-#' in a given data frame based on the `agegroup` and `share` columns.
-#'
-#' @param data_participants A data frame containing at least the following columns:
-#'   - `agegroup`: A character vector indicating whether the participant is an "adult" or a "kid".
-#'   - `share`: A character vector indicating presence with values "x" for stays and "n" for absences.
-#'
-#' @return A list containing:
-#'   - `adults`: The total number of adults in the data frame.
-#'   - `children`: The total number of children in the data frame.
-#'
-#'
-#' @export
-get_stats <- function(data_participants = check_participants()) {
-  stats <- list()
-  stats$adults <- sum(data_participants$agegroup == "adult" , na.rm = TRUE)
-  stats$children <- sum(data_participants$agegroup == "kid", na.rm = TRUE)
-  return(stats)
-}
-```
-
-```{r examples-get_stats}
-stats <- get_stats(check_participants())
-
-```
-
-```{r tests-get_stats}
-data_participants <- check_participants()
-testthat::test_that("The function get stats works fine", {
-  testthat::expect_equal(get_stats(data_participants)$adults, 88)
-})
-```
-
 ## Function to minimize payments between payers and recievers
-This is a helper function. We will recieve people who will recieve money and people who will need to pay money. We need to match those by also reducing the number of payments. 
+This is a helper function. Some people will recieve money and others will need to pay money. We need to match these payers and recievers. We do this and try to reduce the number of overall payments. 
 
 ```{r, function-minimize_payments}
 #' Minimize Payments Between persons
@@ -438,11 +301,11 @@ This is a helper function. We will recieve people who will recieve money and peo
 # Function to calculate payments
 minimize_payments <- function(df) {
   # Separate into payers and receivers
-  payers <- df %>% filter(to_pay > 0) %>% dplyr::arrange(desc(to_pay))
-  receivers <- df %>% filter(to_pay < 0) %>% dplyr::arrange(to_pay)
+  payers <- df %>% filter(.data$to_pay > 0) %>% dplyr::arrange(desc(.data$to_pay))
+  receivers <- df %>% filter(.data$to_pay < 0) %>% dplyr::arrange(.data$to_pay)
   
   # Initialize result data frame to store who pays whom
-  payments <- tibble(payer = character(), receiver = character(), amount = numeric())
+  payments <- dplyr::tibble(payer = character(), receiver = character(), amount = numeric())
   
   # Step 1: Settle exact matches first
   i <- 1
@@ -451,7 +314,7 @@ minimize_payments <- function(df) {
       if (payers$to_pay[i] == abs(receivers$to_pay[j])) {
         # Record the exact match payment
         payments <- payments %>%
-          add_row(payer = payers$person[i], receiver = receivers$person[j], amount = payers$to_pay[i])
+          add_row(payer = payers$element[i], receiver = receivers$element[j], amount = payers$to_pay[i])
         
         # Remove the matched payer and receiver
         payers <- payers[-i,]
@@ -474,7 +337,7 @@ minimize_payments <- function(df) {
     
     # Record the payment
     payments <- payments %>%
-      add_row(payer = payers$person[i], receiver = receivers$person[j], amount = pay_amount)
+      add_row(payer = payers$element[i], receiver = receivers$element[j], amount = pay_amount)
     
     # Adjust balances
     payers$to_pay[i] <- payers$to_pay[i] - pay_amount
@@ -491,8 +354,8 @@ minimize_payments <- function(df) {
 
 ```{r example-minimize_payments}
 
-df <- data.frame(
-  person = c("Brown", "Smith", "Fisher", "Taylor", "Davis", "Johnson", "Wilson", "ORally"),
+df <- dplyr::tibble(
+  element = c("Brown", "Smith", "Fisher", "Taylor", "Davis", "Johnson", "Wilson", "ORally"),
   to_pay = c(-995, -125, -80,  210, 245, 300, 365, 80)
 )
 
@@ -503,10 +366,12 @@ minimize_payments(df)
 
 ```{r tests-minimize_payments}
 library(dplyr)
-df <- tibble(
-  person = c("Brown", "Smith", "Fisher", "Taylor", "Davis", "Johnson", "Wilson", "ORally"),
+df <- dplyr::tibble(
+  element = c("Brown", "Smith", "Fisher", "Taylor", "Davis", "Johnson", "Wilson", "ORally"),
   to_pay = c(-995, -125, -80,  210, 245, 300, 365, 80)
 )
+
+
 
 df_solved <- minimize_payments(df)
 
@@ -517,6 +382,17 @@ testthat::test_that("The function divide costs works properly with internal data
 testthat::test_that("The function divide costs works properly with internal dataset", {
   testthat::expect_equal(sum(df_solved$amount), 1200)
 })
+
+df2 <- dplyr::tibble(
+  element = c("Brown", "Smith", "Fisher", "Taylor", "Davis", "Johnson", "Wilson", "ORally"),
+  to_pay = c(-995, -125, -85,  210, 245, 300, 360, 80)
+) |> minimize_payments()
+
+testthat::test_that("The function divide costs works properly with internal dataset", {
+  testthat::expect_equal(df_solved[df_solved$payer == "Wilson", 3] |> pull(), 365)
+})
+
+
 ```
 
 
@@ -529,81 +405,89 @@ testthat::test_that("The function divide costs works properly with internal data
 #' It reads the participants' and costs' data from files, calculates the total costs for each participant or group,
 #' and returns the amounts to be paid after applying any payments that have already been made.
 #'
-#' @param participants_file Path to the CSV file containing participants' information. Defaults to a file within the package.
-#' @param costs_file Path to the CSV file containing costs' information. Defaults to a file within the package.
+#' @param data The dataset 
 #' @param pay_by A string specifying whether to divide costs by "group" or "individual". Defaults to "group".
 #'
 #' @return A data frame containing the final payments for each person or group after minimizing the payments.
 #'
-#' @details
-#' The function starts by reading the participants and costs data. It calculates the total costs and
-#' distributes them based on the participants' weights. It also considers the payments already made.
-#' Depending on the `pay_by` argument, costs are divided either by group or by individual. The final step
-#' involves minimizing the payments using the `minimize_payments` function.
 #'
 #' @import dplyr tidyr
 #' @export
-costsplitter <- function(participants_df = readr::read_csv(system.file("participants.csv", package = "costsplitter")), 
-                          pay_by = "group"){
+costsplitter <- function(data = readr::read_csv(system.file("participants.csv", package = "costsplitter"), show_col_types = FALSE), 
+                         pay_by = "individual"){
 
-  # Reading in the data
-  data_participants <- participants_df |> 
-    check_participants()  |> 
-    cat_to_num() 
-  
-  # Calculate the weights
-  data_participants <- data_participants |> 
-    dplyr::mutate(weight = adjustment * share * age) 
-  
-  
-  # Doing first calculations
-  total_costs <- sum(data_costs$cost)
-  total_weights <- sum(data_participants$weight)
-  cost_per_weight <- total_costs / total_weights
-  
-  # Calculate costs_produced
-  data_participants <- data_participants |> 
-    dplyr::mutate(costs_produced = weight * cost_per_weight) 
-  
-  # Summarise and add the costs
-  if (pay_by == "group") {
-    df <- data_participants |> 
-      dplyr::group_by(group) |> 
-      dplyr::summarise(costs_produced = sum(costs_produced))|> 
-      dplyr::left_join(
-        data_costs |> 
-          dplyr::group_by(group) |> 
-          dplyr::summarise(payed = sum(cost)),
-        by = "group"
-      ) |> 
-      dplyr::mutate(payed = tidyr::replace_na(payed, 0)) |> 
-      dplyr::mutate(to_pay_unrounded = costs_produced - payed) |> 
-      dplyr::mutate(to_pay = round(to_pay_unrounded / 5) * 5) |> 
-      dplyr::mutate(person = group)
-  } else if (pay_by == "individual") {
-    df <- data_participants |> 
-      dplyr::group_by(id) |> 
-      dplyr::summarise(costs_produced = sum(costs_produced))|> 
-      dplyr::left_join(
-        data_costs |> 
-          dplyr::group_by(id) |> 
-          dplyr::summarise(payed = sum(cost)),
-        by = "id"
-      ) |> 
-      dplyr::mutate(payed = tidyr::replace_na(payed, 0)) |> 
-      dplyr::mutate(to_pay_unrounded = costs_produced - payed) |> 
-      dplyr::mutate(to_pay = round(to_pay_unrounded / 5) * 5) |> 
-      dplyr::mutate(person = as.character(id))
-  }
-  
-  # Apply the minimize_payment function
-  results <- minimize_payments(df |> dplyr::select(person, to_pay))
-  
-  return(results)
+    # Reading in the data
+    data <- readr::read_csv(system.file("participants.csv", package = "costsplitter"), show_col_types = FALSE) |>
+        check_costsplitter_data() |> 
+        cat_to_num() |>
+        dplyr::mutate(across(starts_with("cost_"), ~ . * .data$age * .data$adjustment)) 
+
+    # Split the dataset into participants data and a dataset showing what everybody paid
+    data_participants <- data |> 
+        dplyr::select(.data$name, .data$group, dplyr::starts_with("cost_")) |>
+        tidyr::pivot_longer(cols = dplyr::starts_with("cost_"), names_to = "activity", values_to = "costs") |>
+        dplyr::mutate(activity = stringr::str_split_i(.data$activity, pattern = "_", 2))
+
+    data_costs <- dplyr::left_join(
+        names(data) |> 
+            stringr::str_subset("^cost_") |> 
+            purrr::map_dfr(~ data |> 
+                dplyr::summarise(activity = .x, total_units = sum(.data[[.x]], na.rm = TRUE))) |>
+            dplyr::mutate(activity = stringr::str_remove(.data$activity, "^cost_")),
+        names(data) |> 
+            stringr::str_subset("^pay_") |>
+            purrr::map_dfr(~ data |> 
+                dplyr::summarise(activity = .x, total_payed = sum(.data[[.x]], na.rm = TRUE))) |>
+            dplyr::mutate(activity = stringr::str_remove(.data$activity, "^pay_")), by = "activity"
+    ) |> 
+    dplyr::mutate(cost_per_unit = .data$total_payed / .data$total_units) |>
+    dplyr::select(.data$activity, .data$cost_per_unit)
+
+    # Combine the dataset
+    data_topay <- data_participants |>
+        dplyr::left_join(data_costs, by = "activity") |>
+        dplyr::mutate(topay = .data$costs * .data$cost_per_unit)
+
+    # Get the data_topay and data_recieves
+    data_topay <- if(pay_by == "group"){
+        data_topay |>
+            dplyr::group_by(.data$group) |>
+            dplyr::summarise(to_pay = sum(.data$topay)) |>
+            dplyr::rename(element = .data$group)
+    } else {
+        data_topay |>
+            dplyr::group_by(.data$name) |>
+            dplyr::summarise(to_pay = sum(.data$topay)) |>
+            dplyr::rename(element = .data$name)
+    }
+
+    data_recieves <- if(pay_by == "group"){
+        data |>
+            dplyr::select(.data$group, dplyr::starts_with("pay_")) |>
+            tidyr::pivot_longer(cols = dplyr::starts_with("pay"), names_to = "activity", values_to = "payed") |>
+            dplyr::group_by(.data$group) |>
+            dplyr::summarise(recieves = sum(.data$payed, na.rm = TRUE)) |>
+            dplyr::rename(element = .data$group)
+    } else {
+        data |>
+            dplyr::select(.data$name, dplyr::starts_with("pay_")) |>
+            tidyr::pivot_longer(cols = dplyr::starts_with("pay"), names_to = "activity", values_to = "payed") |>
+            dplyr::group_by(.data$name) |>
+            dplyr::summarise(recieves = sum(.data$payed, na.rm = TRUE)) |>
+            dplyr::rename(element = .data$name)
+    }
+
+    # Combine the data again
+    data_tosplit <- data_topay |> 
+        dplyr::left_join(data_recieves, by = "element") |>
+        dplyr::mutate(to_pay = .data$to_pay - .data$recieves) |>
+        dplyr::select(.data$element, .data$to_pay)
+
+    # Apply the minimization function from above
+    results <- minimize_payments(data_tosplit) 
+
+    return(results)
 }
-
-
-
 ```
 
 ```{r example-costsplitter}
@@ -612,7 +496,7 @@ result <- costsplitter(pay_by = "group")
 
 ```{r tests-costsplitter}
 
-result <- costsplitter(pay_by = "group")
+result <- costsplitter(pay_by = "individual")
 testthat::test_that("The function divide costs works properly with internal dataset", {
   testthat::expect_equal(sum(result$amount), 1120)
 })

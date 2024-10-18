@@ -5,17 +5,15 @@
 \title{Divide Costs Fairly Among Participants}
 \usage{
 costsplitter(
-  participants_df = readr::read_csv(system.file("participants.csv", package =
-    "costsplitter")),
-  pay_by = "group"
+  data = readr::read_csv(system.file("participants.csv", package = "costsplitter"),
+    show_col_types = FALSE),
+  pay_by = "individual"
 )
 }
 \arguments{
+\item{data}{The dataset}
+
 \item{pay_by}{A string specifying whether to divide costs by "group" or "individual". Defaults to "group".}
-
-\item{participants_file}{Path to the CSV file containing participants' information. Defaults to a file within the package.}
-
-\item{costs_file}{Path to the CSV file containing costs' information. Defaults to a file within the package.}
 }
 \value{
 A data frame containing the final payments for each person or group after minimizing the payments.
@@ -24,12 +22,6 @@ A data frame containing the final payments for each person or group after minimi
 This function calculates the fair division of costs among participants based on their weights.
 It reads the participants' and costs' data from files, calculates the total costs for each participant or group,
 and returns the amounts to be paid after applying any payments that have already been made.
-}
-\details{
-The function starts by reading the participants and costs data. It calculates the total costs and
-distributes them based on the participants' weights. It also considers the payments already made.
-Depending on the \code{pay_by} argument, costs are divided either by group or by individual. The final step
-involves minimizing the payments using the \code{minimize_payments} function.
 }
 \examples{
 result <- costsplitter(pay_by = "group")

@@ -6,3 +6,11 @@
 ^README\.Rmd$
 ^\.github$
 ^codecov\.yml$
+
+^README.html$
+^README_files$
+^_pkgdown.yml$
+^costsplitter.code-workspace$
+^docs$
+
+^.linter$

@@ -24,22 +24,21 @@ library(costsplitter)
 # This is the documentation of all functions of the package
 
 
-## Function to read costs file
-This is a helper function that reads in the data from the participant file.
-
-```{r example-check_costs}
-data_costs <- costsplitter::check_costs()
-```
-
-
-
-
-
-## Function to read the participants file
+## Function to check the costsplitter data
 This is a helper function that reads in the data from the participant file
 
-```{r examples-check_participants}
-data_participants <- check_participants()
+```{r examples-check_costsplitter_data}
+library(dplyr)
+library(stringr)
+data <- data.frame(
+  name = c("Alice", "Bob", "Charlie"),
+  pay_breakfast = c(20, 0, 10),
+  share_breakfast = c(1, "half", "full"),
+  age = c(30, "kid", NA),
+  adjustment = c("more", NA, "less")
+)
+
+check_costsplitter_data(data)
 
 ```
 
@@ -47,37 +46,24 @@ data_participants <- check_participants()
 
 
 ## Function to change the categorical values to numerical values 
-This is a helper function that is used in the check_participants function. In the cost variables we accept categorical values. These categorical values need to be turned into numeric values 
+This is a helper function that is used in the check_costsplitter_data function. In the cost variables we accept categorical values. These categorical values need to be turned into numeric values 
 
 ```{r examples-cat_to_num}
-data_participants = check_participants()
-data_participants2 <- cat_to_num(data_participants)
-```
-
-
-
-
-
-
-
-
-## Function to collect some basic stats 
-This function collects some basic stats about the activity and the participants
-
-```{r examples-get_stats}
-stats <- get_stats(check_participants())
+data_participants = check_costsplitter_data() |> cat_to_num()
 
 ```
+
+
 
 
 
 ## Function to minimize payments between payers and recievers
-This is a helper function. We will recieve people who will recieve money and people who will need to pay money. We need to match those by also reducing the number of payments. 
+This is a helper function. Some people will recieve money and others will need to pay money. We need to match these payers and recievers. We do this and try to reduce the number of overall payments. 
 
 ```{r example-minimize_payments}
 
-df <- data.frame(
-  person = c("Brown", "Smith", "Fisher", "Taylor", "Davis", "Johnson", "Wilson", "ORally"),
+df <- dplyr::tibble(
+  element = c("Brown", "Smith", "Fisher", "Taylor", "Davis", "Johnson", "Wilson", "ORally"),
   to_pay = c(-995, -125, -80,  210, 245, 300, 365, 80)
 )
 

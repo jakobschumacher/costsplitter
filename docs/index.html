@@ -32,6 +32,12 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+<li><a class="dropdown-item" href="articles/divide-costs-fairly-amongst-friends.html">Divide costs fairly amongst friends</a></li>
+  </ul>
+</li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
@@ -48,34 +54,160 @@
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header"><h1 id="whats-this-package-costsplitter-about">What’s this package <code>costsplitter</code> about?<a class="anchor" aria-label="anchor" href="#whats-this-package-costsplitter-about"></a>
 </h1></div>
-<p>This package splits the costs of a group activity. For example: if you go hiking with your friends the whole group has some costs that need to be divided. Somebody pays for the stay another one for the food. In the end you need to split fairly. In many cases you can split evenly. But sometimes this can be unfair. What if somebody had to leave early? What if somebody only participated in some activities? What if somebody booked a bed but couldnt show up? What if there is a person who earns less and others would like to chip in? What if there were children who eat less than a full grown adult? This R package tries to balance these problems to have a fair distribution. Friendship is great</p>
+<p>The package <code>costsplitter</code> is an R package designed to simplify the complex task of splitting costs for group activities. While evenly dividing expenses among participants is straightforward in many situations, real-world scenarios often require a more nuanced approach. The package <code>costsplitter</code> addresses various factors that can complicate cost-sharing:</p>
+<ul>
+<li>Partial participation (e.g., leaving early or joining late)</li>
+<li>Involvement in only select activities</li>
+<li>Unused reservations or no-shows</li>
+<li>Income disparities among group members</li>
+<li>Age-based consumption differences (e.g., children vs. adults)</li>
+</ul>
+<p>By considering these variables, <code>costsplitter</code> calculates a fair distribution of expenses, ensuring that each participant contributes an amount proportional to their involvement and circumstances. Whether you’re planning a hiking trip, shared vacation, or any group event with shared costs, <code>costsplitter</code> offers a sophisticated solution to the often challenging task of equitable expense allocation.</p>
 </div>
 <div class="section level1">
 <h1 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h1>
-<pre><code><span><span class="co"># Install devtools first</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"devtools"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Install the package from github</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="va">github.com</span><span class="op">/</span><span class="va">jakobschumacher</span><span class="op">/</span><span class="va">costsplitter</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Start using the package</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">costsplitter</span><span class="op">)</span></span></code></pre>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Install the package from github</span></span>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="va">github.com</span><span class="op">/</span><span class="va">jakobschumacher</span><span class="op">/</span><span class="va">costsplitter</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level1">
-<h1 id="how-to-use-this-package">How to use this package<a class="anchor" aria-label="anchor" href="#how-to-use-this-package"></a>
+<h1 id="step-1-prepare-the-data">Step 1: Prepare the data<a class="anchor" aria-label="anchor" href="#step-1-prepare-the-data"></a>
 </h1>
 <p>So you are convinced that this package is something for you? You want to give it a try? Go ahead. Follow the following steps to divide the costs of an activity fair amongst all participants</p>
-<p>First <strong>prepare the input files</strong>. This is the tricky part of the undertaking. You need to have two files where you collect all the information that you need. Fortunately you can use those files also during the planning of the group activity - so next time you start with a group activity write down the information acording to the following scheme.</p>
+<p>First <strong>prepare the input files</strong>. This is the tricky part of the undertaking. You need to have your data in a correct format, otherwise the function will not work correctly. Use a spreadsheet that can also be helpful during the planning of the group activity. The data should conatin the following columns:</p>
 <blockquote>
-<p>The <code>participants.csv</code> file. This should be a csv file. There should be 4 types of columns in that file: person columns (something like <em>id</em>, <em>name</em> or <em>age</em>), grouping columns (usually called <em>group</em>), cost columns (that all start with the prefix <em>cost_</em> and the continue with the name of the cost) and lastely and adjustment column (called <em>adjustment</em>). You can have a look at the example file <a href="inst/participants.csv">participants.csv</a></p>
+<p>The <code>name</code> column. This column indicates the names of the person involved. This is a must have column otherwise the package will throw an error. The names must be unique.</p>
 </blockquote>
 <blockquote>
-<p>The <code>costs.csv</code> file. This file contains all the costs. One column must be <em>id</em>, one column must be the name of the cost and one column should contain the actual cost. You can have a look at the example file <a href="inst/costs.csv">costs.csv</a></p>
+<p>The <code>pay_</code> columns. These columns hold the amount that somebody paid for one activity. At least one <code>pay_</code> column must be available. All <code>pay_</code> columns should either start with <code>pay_</code> or a string given by <code>var_pay</code>. For everything slightly more complicated you want to match the <code>pay_</code>column with the <code>share_</code>columns. This must be done by a corresponding part after the <code>_</code> e.g. <code>pay_breakfast</code>and <code>share_breakfast</code>. The value should be numeric.</p>
 </blockquote>
-<p>Then <strong>do the analysis</strong>. This is the easy part. If the input files are in structured in the right way, all you need to do is run:</p>
-<pre><code><span><span class="fu"><a href="reference/divide_fairly.html">divide_fairly</a></span><span class="op">(</span>participants_file <span class="op">=</span> <span class="st">"link_to_participants_file.csv"</span>, costs_file <span class="op">=</span> <span class="st">"link_to_costs_file.csv"</span><span class="op">)</span></span></code></pre>
+<blockquote>
+<p>The <code>share_</code>columns. These columns hold the share that everyone has to pay for the activity. All <code>share_</code> columns should either start with <code>share_</code> or a string given by <code>var_share</code>. The second part of the name after the <code>_</code> must correspond to the <code>pay_</code>column. The value can be numeric between 0 (meaning does not hove to pay) and 1 (pays his full share) and they can also hold categorical values <code>full</code> or <code>reduced</code> or <code>half</code> or <code>some</code>. These categorical values will be transformed to numerical values. The corresponding value can be controlled with the function arguments <code>value_full</code>, <code>value_reduced</code>, <code>value_half</code> or <code>value_some</code> respectively. NA values and empty values will be translated into 0.</p>
+</blockquote>
+<blockquote>
+<p>The <code>group</code> column. Several persons can be put together to form a group. This can be indicated in this column.</p>
+</blockquote>
+<blockquote>
+<p>The <code>age</code> column. This column indicates the age of the persons involved. The value should be an integer value between 0 and 120. The value could also be either <code>adult</code> or <code>kid</code>, that will be translated into 1 and 0.5 respectively. NA values and empty values will be translated into 1.</p>
+</blockquote>
+<blockquote>
+<p>The <code>adjustment</code> column. To give a general bonus or malus that will apply the complete amount somebody has to pay you can use the adjustment column. This column can be numeric between 0 (indicating no pay) and 100 (indicating 100x times the normal share). The value can also be categorical with <code>more</code> indicating that the person should pay 1.2 times more and <code>less</code> indicating that the person should pay only 0.8 of the usual amount. NA values and empty values will be translated into 1.</p>
+</blockquote>
+<p>Here is an example of a suitable dataset.</p>
+<table class="table">
+<colgroup>
+<col width="18%">
+<col width="10%">
+<col width="8%">
+<col width="12%">
+<col width="11%">
+<col width="12%">
+<col width="11%">
+<col width="13%">
+</colgroup>
+<thead><tr class="header">
+<th align="left">name</th>
+<th align="left">group</th>
+<th align="left">age</th>
+<th align="left">cost_day1</th>
+<th align="right">pay_day1</th>
+<th align="left">cost_day2</th>
+<th align="right">pay_day2</th>
+<th align="left">adjustment</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">James Smith</td>
+<td align="left">Smith</td>
+<td align="left">adult</td>
+<td align="left">full</td>
+<td align="right">NA</td>
+<td align="left">full</td>
+<td align="right">NA</td>
+<td align="left">NA</td>
+</tr>
+<tr class="even">
+<td align="left">Olivia Johnson</td>
+<td align="left">Johnson</td>
+<td align="left">NA</td>
+<td align="left">0.8</td>
+<td align="right">NA</td>
+<td align="left">full</td>
+<td align="right">NA</td>
+<td align="left">less</td>
+</tr>
+<tr class="odd">
+<td align="left">Ethan Brown</td>
+<td align="left">Brown</td>
+<td align="left">3</td>
+<td align="left">full</td>
+<td align="right">NA</td>
+<td align="left">full</td>
+<td align="right">NA</td>
+<td align="left">NA</td>
+</tr>
+<tr class="even">
+<td align="left">Amelia Taylor</td>
+<td align="left">Smith</td>
+<td align="left">adult</td>
+<td align="left">full</td>
+<td align="right">NA</td>
+<td align="left">full</td>
+<td align="right">657</td>
+<td align="left">NA</td>
+</tr>
+<tr class="odd">
+<td align="left">Lucas Wilson</td>
+<td align="left">Wilson</td>
+<td align="left">adult</td>
+<td align="left">NA</td>
+<td align="right">NA</td>
+<td align="left">NA</td>
+<td align="right">NA</td>
+<td align="left">NA</td>
+</tr>
+<tr class="even">
+<td align="left">Emma Davis</td>
+<td align="left">Smith</td>
+<td align="left">NA</td>
+<td align="left">full</td>
+<td align="right">800</td>
+<td align="left">full</td>
+<td align="right">NA</td>
+<td align="left">NA</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level1">
+<h1 id="step-2-do-the-analysis">Step 2: Do the analysis<a class="anchor" aria-label="anchor" href="#step-2-do-the-analysis"></a>
+</h1>
+<p>This is the easy part. If the input files are in structured in the right way, all you need to do is run:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Load the package</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">costsplitter</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Read in the data</span></span>
+<span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">'your_data_set.csv'</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Do the analysis</span></span>
+<span><span class="fu"><a href="reference/costsplitter.html">costsplitter</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span></code></pre></div>
 <p>What this will do is: It reads in the files, checks if the files are structured in the right way, changes categorical values into numerical values, it calculates a weight based on the age, adjustment and the grade of involvement. In the end it gives out the amount that everybody needs to pay and whom the money should be paid.</p>
+<p>Here is an example of an analysis where many features are controlled</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Load the package</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">costsplitter</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Read in the data</span></span>
+<span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">'your_data_set.csv'</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Do the analysis</span></span>
+<span><span class="fu"><a href="reference/costsplitter.html">costsplitter</a></span><span class="op">(</span><span class="va">data</span>,</span>
+<span>    var_share <span class="op">=</span> <span class="st">"payindicator_"</span>, <span class="co"># Replacing the *share_* to *payindicator_*</span></span>
+<span>    use_adjustment <span class="op">=</span> <span class="cn">FALSE</span>, <span class="co"># Explicitly state that no adjustment should be used</span></span>
+<span>    use_age <span class="op">=</span> <span class="cn">TRUE</span>, <span class="co"># Explicitly stating that age should be used</span></span>
+<span>    value_kid <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span> <span class="co"># Setting the percentage what kids should pay</span></span></code></pre></div>
 </div>
 
   </main><aside class="col-md-3"><div class="license">
@@ -112,7 +244,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.9000.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer>

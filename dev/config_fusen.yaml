@@ -3,16 +3,12 @@ flat_money_transfer.Rmd:
   state: active
   R:
   - R/cat_to_num.R
-  - R/check_costs.R
-  - R/check_participants.R
+  - R/check_costsplitter_data.R
   - R/costsplitter.R
-  - R/get_stats.R
   - R/minimize_payments.R
   tests:
-  - tests/testthat/test-check_costs.R
-  - tests/testthat/test-check_participants.R
+  - tests/testthat/test-check_costsplitter_data.R
   - tests/testthat/test-cat_to_num.R
-  - tests/testthat/test-get_stats.R
   - tests/testthat/test-minimize_payments.R
   - tests/testthat/test-costsplitter.R
   vignettes: vignettes/divide-costs-fairly-amongst-friends.Rmd
