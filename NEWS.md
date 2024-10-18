@@ -1,3 +1,3 @@
-# Package costsplitter 0.5
+# costsplitter 0.7
 
-* First public version
+* Initial working version.
