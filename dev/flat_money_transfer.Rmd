@@ -16,255 +16,6 @@ pkgload::load_all(path = here::here(), export_all = FALSE)
 ```
 
 
-## Function to check the costsplitter data
-This is a helper function that reads in the data from the participant file
-```{r function-check_costsplitter_data}
-#' Check the dataset for conformity with costsplitter prerequisites
-#'
-#' This function checks whether a given dataset conforms to the expected format and requirements
-#' of the `costsplitter` package. It ensures the presence and validity of required columns such
-#' as `name`, `pay_`, `share_`, `group`, `age`, and `adjustment`.
-#'
-#' @param data A data frame containing the cost-sharing data.
-#' @param var_pay A string indicating the prefix for payment columns (default is "pay_").
-#' @param var_share A string indicating the prefix for share columns (default is "share_").
-#' @param value_full A numeric value representing the full share (default is 1).
-#' @param value_reduced A numeric value representing the reduced share (default is 0.8).
-#' @param value_half A numeric value representing the half share (default is 0.5).
-#' @param value_some A numeric value representing the partial share (default is 0.3).
-#'
-#' @return A message indicating whether the dataset conforms to `costsplitter` prerequisites.
-#'         Stops execution if the dataset does not conform.
-#' @export
-check_costsplitter_data <- function(var_pay = "pay_", 
-                                    var_share = "share_",
-                                    value_full = 1, 
-                                    value_reduced = 0.8, 
-                                    value_half = 0.5, 
-                                    value_some = 0.3) {
-  
-  # Check if 'name' column exists and is unique
-  if (!"name" %in% colnames(data)) {
-    stop("The 'name' column is missing.")
-  }
-
-  if (anyDuplicated(data$name)) {
-    stop("The 'name' column contains duplicate entries.")
-  }
-
-  # Check for at least one 'pay_' column
-  pay_cols <- grep(paste0("^", var_pay), colnames(data), value = TRUE)
-  if (length(pay_cols) == 0) {
-    stop("At least one 'pay_' column must be present.")
-  }
-
-  
-    # Get all 'share_' columns
-  share_cols <- data %>%
-    select(starts_with(var_share)) %>%
-    colnames()
-  
-
-  # Validate 'age' column
-  if ("age" %in% colnames(data)) {
-    age_values <- data$age
-    if (all(age_values %in% c(NA, "", "adult", "kid") | (is.numeric(age_values) & age_values <= 0 & age_values >= 120))) {
-      stop("The 'age' column must be a number between 0 and 120, or 'adult' or 'kid'.")
-    }
-  }
-
-  # Validate 'adjustment' column
-  if ("adjustment" %in% colnames(data)) {
-    adjustment_values <- data$adjustment
-    if (all(!(adjustment_values %in% c(NA, "", "more", "less")) | (is.numeric(adjustment_values) & adjustment_values <= 0 & adjustment_values >= 100))) {
-      stop("The 'adjustment' column must be a number between 0 and 100 or categorical ('more', 'less').")
-    }
-  }
-
-  return(data)
-}
-
-```
-
-
-```{r examples-check_costsplitter_data}
-library(dplyr)
-library(stringr)
-data <- data.frame(
-  name = c("Alice", "Bob", "Charlie"),
-  pay_breakfast = c(20, 0, 10),
-  share_breakfast = c(1, "half", "full"),
-  age = c(30, "kid", NA),
-  adjustment = c("more", NA, "less")
-)
-
-check_costsplitter_data(data)
-
-```
-
-```{r tests-check_costsplitter_data}
-library(testthat)
-
-test_that("Valid dataset passes checks", {
-  data <- data.frame(
-    name = c("Alice", "Bob", "Charlie"),
-    pay_breakfast = c(20, 0, 10),
-    share_breakfast = c(1, "half", "full"),
-    age = c(30, "kid", NA),
-    adjustment = c("more", NA, "less"),
-    stringsAsFactors = FALSE
-  )
-  
-  expect_type(check_costsplitter_data(data), "list")
-})
-
-test_that("Missing 'name' column throws an error", {
-  data <- data.frame(
-    pay_breakfast = c(20, 0, 10),
-    share_breakfast = c(1, "half", "full")
-  )
-  
-  expect_error(check_costsplitter_data(data), "The 'name' column is missing.")
-})
-
-test_that("Duplicate 'name' values throw an error", {
-  data <- data.frame(
-    name = c("Alice", "Alice", "Charlie"),
-    pay_breakfast = c(20, 0, 10),
-    share_breakfast = c(1, "half", "full")
-  )
-  
-  expect_error(check_costsplitter_data(data), "The 'name' column contains duplicate entries.")
-})
-
-test_that("At least one 'pay_' column is required", {
-  data <- data.frame(
-    name = c("Alice", "Bob", "Charlie"),
-    share_breakfast = c(1, "half", "full")
-  )
-  
-  expect_error(check_costsplitter_data(data), "At least one 'pay_' column must be present.")
-})
-
-test_that("'pay_' columns must be numeric", {
-  data <- data.frame(
-    name = c("Alice", "Bob", "Charlie"),
-    pay_breakfast = c("twenty", 0, 10),
-    share_breakfast = c(1, "half", "full")
-  )
-  
-  expect_error(check_costsplitter_data(data), "The 'pay_breakfast' column must be numeric.")
-})
-
-
-```
-
-
-## Function to change the categorical values to numerical values 
-This is a helper function that is used in the check_costsplitter_data function. In the cost variables we accept categorical values. These categorical values need to be turned into numeric values 
-
-```{r function-cat_to_num}
-#' Convert Categorical Values to Numeric
-#'
-#' This function converts various categorical values within the dataset to numeric values, 
-#' particularly for cost shares and age adjustments, as per the parameters provided. 
-#' It processes specific columns like age and adjustment to create numeric equivalents, 
-#' enabling further analysis and computation within the `costsplitter` package.
-#'
-#' @param data A data frame, typically the output of \code{check_costsplitter_data()}, containing the cost and participant information. 
-#' Defaults to \code{check_costsplitter_data()} if not provided.
-#' @param age_adjustment A numeric value used to scale age values to proportions. Default is \code{1/18}.
-#' @param share_adult A numeric value indicating the proportion for adults. Default is \code{1}.
-#' @param share_kid A numeric value indicating the proportion for kids. Default is \code{0.5}.
-#' @param share_full A numeric value representing the full share for participants. Default is \code{1}.
-#' @param share_reduced A numeric value representing the reduced share for participants. Default is \code{0.7}.
-#' @param share_less A numeric value representing a discounted share applied to participants with the "less" category. Default is \code{0.8}.
-#' @param share_more A numeric value representing an increased share applied to participants with the "more" category. Default is \code{1.2}.
-#' 
-#' @return A data frame with transformed numeric values for age, adjustment, and other relevant columns.
-#'
-#' @details The function handles several transformations:
-#' \itemize{
-#'   \item Categorical values in cost columns (e.g., "full", "reduced") are converted to numeric.
-#'   \item Age values are translated based on adult and kid patterns in both English and German.
-#'   \item The adjustment column is converted to numeric based on predefined categories like "more" and "less."
-#' }
-#'
-#'
-#' @export
-cat_to_num <- function(data = check_costsplitter_data(),
-                       age_adjustment = (1 / 18),
-                       share_adult = 1,
-                       share_kid = 0.5,
-                       share_full = 1, 
-                       share_reduced = 0.7, 
-                       share_less = 0.8, 
-                       share_more = 1.2) {
-  
-  # Convert shares to characters for case_when
-  share_reduced_character = as.character(share_reduced)
-  share_adult_character = as.character(share_adult * 18)
-  share_kid_character = as.character(share_kid * 18)
-  share_full_character = as.character(share_full)
-  share_less_character = as.character(share_less)
-  share_more_character = as.character(share_more)
-  
-  # Define patterns for adults and kids in both English and German
-  adult_patterns <- tolower(c("adult", "adults", "erwachsene", "erwachsenen"))
-  kid_patterns <- tolower(c("kid", "kids", "kind", "kinder"))
-
-  data <- data |>
-    mutate(across(starts_with("cost_"), ~ as.numeric(case_when(
-      is.na(.) | . == "" ~ "0",
-      . == "full" ~ "1",
-      . == "reduced" ~ share_reduced_character,
-      TRUE ~ .
-    )))) |>
-    # Age
-    dplyr::mutate(age = dplyr::case_when(
-      is.na(.data$age) | .data$age == "" ~ "18",
-      .data$age %in% adult_patterns ~ share_adult_character,
-      .data$age %in% kid_patterns ~ share_kid_character,
-      TRUE ~ .data$age
-    )) |> 
-    dplyr::mutate(age = as.numeric(.data$age)) |> 
-    dplyr::mutate(age = round(.data$age * age_adjustment, 2)) |>
-    # Adjustment
-    dplyr::mutate(adjustment = dplyr::case_when(
-      is.na(.data$adjustment) | .data$adjustment == "" ~ "1",
-      .data$adjustment == "more" ~ share_more_character,
-      .data$adjustment == "less" ~ share_less_character,
-      TRUE ~ .data$adjustment
-    )) |>
-    dplyr::mutate(adjustment = as.numeric(.data$adjustment)) 
-  
-  return(data)
-}
-```
-
-```{r examples-cat_to_num}
-data_participants = check_costsplitter_data() |> cat_to_num()
-
-```
-
-
-```{r tests-cat_to_num}
-data_participants <- check_costsplitter_data() |> cat_to_num()
-testthat::test_that("The function change categorical to numeric works fine", {
-  testthat::expect_type(data_participants$age, "double")
-  testthat::expect_true(all(data_participants |> 
-    select(starts_with("cost")) |> 
-    purrr::map_lgl(is.double)))
-  testthat::expect_true(all(data_participants |> 
-    select(starts_with("pay")) |> 
-    purrr::map_lgl(is.double)))
-  testthat::expect_type(data_participants$adjustment, "double")
-  testthat::expect_false(all(is.na(data_participants$adjustment)))
-  testthat::expect_false(all(is.na(data_participants$age)))
-})
-```
-
-
 
 ## Function to minimize payments between payers and recievers
 This is a helper function. Some people will recieve money and others will need to pay money. We need to match these payers and recievers. We do this and try to reduce the number of overall payments. 
@@ -292,10 +43,10 @@ This is a helper function. Some people will recieve money and others will need t
 #'
 #' @export
 # Function to calculate payments
-minimize_payments <- function(df) {
+minimize_payments <- function(df = data_tosplit) {
   # Separate into payers and receivers
-  payers <- df %>% filter(.data$to_pay > 0) %>% dplyr::arrange(desc(.data$to_pay))
-  receivers <- df %>% filter(.data$to_pay < 0) %>% dplyr::arrange(.data$to_pay)
+  payers <- df |> dplyr::filter(to_pay > 0) |> dplyr::arrange(desc(to_pay))
+  receivers <- df |> dplyr::filter(to_pay < 0) |> dplyr::arrange(to_pay)
   
   # Initialize result data frame to store who pays whom
   payments <- dplyr::tibble(payer = character(), receiver = character(), amount = numeric())
@@ -306,7 +57,7 @@ minimize_payments <- function(df) {
     for (j in 1:nrow(receivers)) {
       if (payers$to_pay[i] == abs(receivers$to_pay[j])) {
         # Record the exact match payment
-        payments <- payments %>%
+        payments <- payments |>
           add_row(payer = payers$element[i], receiver = receivers$element[j], amount = payers$to_pay[i])
         
         # Remove the matched payer and receiver
@@ -329,7 +80,7 @@ minimize_payments <- function(df) {
     pay_amount <- min(payers$to_pay[i], abs(receivers$to_pay[j]))
     
     # Record the payment
-    payments <- payments %>%
+    payments <- payments |>
       add_row(payer = payers$element[i], receiver = receivers$element[j], amount = pay_amount)
     
     # Adjust balances
@@ -408,29 +159,114 @@ testthat::test_that("The function divide costs works properly with internal data
 #' @export
 costsplitter <- function(data = readr::read_csv(system.file("participants.csv", package = "costsplitter"), show_col_types = FALSE), 
                          pay_by = "individual", 
+                         var_pay = "pay_", 
+                         var_share = "share_",
+                         age_adjustment = (1 / 18),
+                        share_adult = 1,
+                        share_kid = 0.5,
+                        share_full = 1, 
+                        share_reduced = 0.7, 
+                        share_less = 0.8, 
+                        share_more = 1.2
                          ...){
 
+# Make sure that the columns are correctly takes as character
+data <- rio::import(here::here("..", "Abrechnung.xlsx")) |>
+        dplyr::tibble() |>
+        dplyr::mutate(across(starts_with("share_"), as.character)) |>
+        dplyr::mutate(across(starts_with("age"), as.character)) 
+
+
+# Check if 'name' column exists and is unique
+  if (!"name" %in% colnames(data)) {
+    stop("The 'name' column is missing.")
+  }
+
+  if (anyDuplicated(data$name)) {
+    stop("The 'name' column contains duplicate entries.")
+  }
+
+  # Check for at least one 'pay_' column
+  pay_cols <- grep(paste0("^", var_pay), colnames(data), value = TRUE)
+  if (length(pay_cols) == 0) {
+    stop("At least one 'pay_' column must be present.")
+  }
+
+  # Validate 'age' column
+  if ("age" %in% colnames(data)) {
+    age_values <- data$age
+    if (all(age_values %in% c(NA, "", "adult", "kid") | (is.numeric(age_values) & age_values <= 0 & age_values >= 120))) {
+      stop("The 'age' column must be a number between 0 and 120, or 'adult' or 'kid'.")
+    }
+  }
+
+  # Validate 'adjustment' column
+  if ("adjustment" %in% colnames(data)) {
+    adjustment_values <- data$adjustment
+    if (all(!(adjustment_values %in% c(NA, "", "more", "less")) | (is.numeric(adjustment_values) & adjustment_values <= 0 & adjustment_values >= 100))) {
+      stop("The 'adjustment' column must be a number between 0 and 100 or categorical ('more', 'less').")
+    }
+  }
+
+
+
+# Convert shares to characters for case_when
+  share_reduced_character = as.character(share_reduced)
+  share_adult_character = as.character(share_adult * 18)
+  share_kid_character = as.character(share_kid * 18)
+  share_full_character = as.character(share_full)
+  share_less_character = as.character(share_less)
+  share_more_character = as.character(share_more)
+  
+  # Define patterns for adults and kids in both English and German
+  adult_patterns <- tolower(c("adult", "adults", "erwachsene", "erwachsenen"))
+  kid_patterns <- tolower(c("kid", "kids", "kind", "kinder"))
+
+# Change categorical values to numerical values
+  data <- data |>
+    dplyr::mutate(across(tidyr::starts_with("share_"), ~ as.numeric(dplyr::case_when(
+      is.na(.) | . == "" ~ "0",
+      . == "full" ~ "1",
+      . == "reduced" ~ share_reduced_character,
+      TRUE ~ .
+    )))) |>
+    # Age
+    dplyr::mutate(age = dplyr::case_when(
+      is.na(.data$age) | .data$age == "" ~ "18",
+      .data$age %in% adult_patterns ~ share_adult_character,
+      .data$age %in% kid_patterns ~ share_kid_character,
+      TRUE ~ .data$age
+    )) |> 
+    dplyr::mutate(age = as.numeric(.data$age)) |> 
+    dplyr::mutate(age = round(.data$age * age_adjustment, 2)) |>
+    # Adjustment
+    dplyr::mutate(adjustment = dplyr::case_when(
+      is.na(.data$adjustment) | .data$adjustment == "" ~ "1",
+      .data$adjustment == "more" ~ share_more_character,
+      .data$adjustment == "less" ~ share_less_character,
+      TRUE ~ .data$adjustment
+    )) |>
+    dplyr::mutate(adjustment = as.numeric(.data$adjustment)) 
+
+
+
+
     # Reading in the data
-        data <- data |>
-        tibble() |>
-        mutate(across(starts_with("share_"), as.character)) |>
-        mutate(across(starts_with("age"), as.character)) |>
-        check_costsplitter_data()   
-        cat_to_num() |>
-        dplyr::mutate(across(starts_with("cost_"), ~ . * .data$age * .data$adjustment)) 
+    data <- data |>
+        dplyr::mutate(across(starts_with("share_"), ~ . * .data$age * .data$adjustment)) 
 
     # Split the dataset into participants data and a dataset showing what everybody paid
     data_participants <- data |> 
-        dplyr::select(.data$name, .data$group, dplyr::starts_with("cost_")) |>
-        tidyr::pivot_longer(cols = dplyr::starts_with("cost_"), names_to = "activity", values_to = "costs") |>
+        dplyr::select(.data$name, .data$group, dplyr::starts_with("share_")) |>
+        tidyr::pivot_longer(cols = dplyr::starts_with("share_"), names_to = "activity", values_to = "costs") |>
         dplyr::mutate(activity = stringr::str_split_i(.data$activity, pattern = "_", 2))
 
     data_costs <- dplyr::left_join(
         names(data) |> 
-            stringr::str_subset("^cost_") |> 
+            stringr::str_subset("^share_") |> 
             purrr::map_dfr(~ data |> 
                 dplyr::summarise(activity = .x, total_units = sum(.data[[.x]], na.rm = TRUE))) |>
-            dplyr::mutate(activity = stringr::str_remove(.data$activity, "^cost_")),
+            dplyr::mutate(activity = stringr::str_remove(.data$activity, "^share_")),
         names(data) |> 
             stringr::str_subset("^pay_") |>
             purrr::map_dfr(~ data |> 
