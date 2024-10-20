@@ -4,7 +4,7 @@
 \alias{minimize_payments}
 \title{Minimize Payments Between persons}
 \usage{
-minimize_payments(df)
+minimize_payments(df = data_tosplit)
 }
 \arguments{
 \item{df}{A tibble or data frame with two columns:

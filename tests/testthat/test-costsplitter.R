@@ -6,3 +6,146 @@ testthat::test_that("The function divide costs works properly with internal data
   testthat::expect_equal(sum(result$amount), 1120)
 })
 
+
+testthat::test_that("Check that helper_process_age runs without error", {
+  df <- valid_trip_data
+  df$age <- c("adult", "adult", "kid", "kid", "kid")
+  testthat::expect_no_error(helper_process_age(df))
+})
+
+
+testthat::test_that("Check that helper_process_age runs without error", {
+  df <- valid_trip_data
+  df$age <- c(1,3,4,6,7)
+  testthat::expect_no_error(helper_process_age(df))
+})
+
+testthat::test_that("Check that helper_process_age runs without error", {
+  df <- valid_trip_data
+  df$age <- c(1,3,"adult",6,7)
+  testthat::expect_no_error(helper_process_age(df))
+})
+
+
+testthat::test_that("Check that helper_process_age runs without error", {
+  df <- valid_trip_data
+  df$age <- c(1,3,"adult",NA,7)
+  testthat::expect_no_error(helper_process_age(df))
+})
+
+
+testthat::test_that("Output contains only 'name', 'activity', and 'age'", {
+  # Example output from your function
+  df <- helper_process_age(valid_trip_data)
+  
+  # Get the names of the expected columns
+  expected_columns <- c("name", "activity", "age")
+  
+  # Test if the column names are exactly as expected
+  testthat::expect_named(df, expected_columns)
+})
+
+
+library(testthat)
+
+# Test if the function runs without error for categorical values
+test_that("Check that helper_process_share runs without error for categorical values", {
+  df <- valid_trip_data
+  df$share_meal = c("full", "full", "reduced", "half", "some")
+  df$share_tour = c("full", "half", "reduced", "full", "some")
+  expect_no_error(helper_process_share(df))
+})
+
+# Test if the function runs without error for numeric values within range
+test_that("Check that helper_process_share runs without error for numeric values within range", {
+  df <- valid_trip_data
+  df$share_meal = c(8, 1, 0.5, 12, 6)
+  df$share_tour = c(8, 1, 0.5, 12, 6)
+
+  expect_no_error(helper_process_share(df))
+})
+
+# Test if the function runs without error for a mix of numeric and categorical values
+test_that("Check that helper_process_share runs without error for a mix of numeric and categorical values", {
+  df <- valid_trip_data
+  df$share_meal = c(8, 1, "full", 12, 6)
+  df$share_tour = c(8, 1, 0.5, "half", 6)
+  expect_no_error(helper_process_share(df))
+})
+
+# Test if the function runs without error when there are NA values
+test_that("Check that helper_process_share runs without error for NA values", {
+    df <- valid_trip_data
+  df$share_meal = c(8, 1, "full", "", 6)
+  df$share_tour = c(8, 1, 0.5, "half", NA)
+  expect_no_error(helper_process_share(df))
+})
+
+# Test if the function output contains only the 'name', 'activity', and 'share' columns
+test_that("Output contains only 'name', 'activity', and 'share'", {
+  df <- data.frame(
+    name = c("John", "Jane", "Alex", "Kate", "Tom"),
+    share_activity_walking = c(0.5, "full", "reduced", 0.7, "half"),
+    share_activity_running = c("some", 0.3, 1, "full", 0.5)
+  )
+  
+  # Process the data frame
+  processed_df <- helper_process_share(df)
+  
+  # Get the names of the expected columns
+  expected_columns <- c("name", "activity", "share")
+  
+  # Test if the column names are exactly as expected
+  expect_named(processed_df, expected_columns)
+})
+
+
+library(testthat)
+
+# Test if the function runs without error for categorical values
+testthat::test_that("Check that helper_process_pay runs an error for categorical values", {
+  df <- valid_trip_data
+  df$pay_meal = c("full", "full", "reduced", "half", "some")
+  df$pay_tour = c("full", "half", "reduced", "full", "some")
+  expect_error(helper_process_pay(df))
+})
+
+# Test if the function runs without error for numeric values within range
+test_that("Check that helper_process_pay runs without error for numeric values", {
+  df <- valid_trip_data
+  df$pay_meal = c(8, 1, 0.5, 12, 6)
+  df$pay_tour = c(8, 1, 0.5, 12, 6)
+
+  expect_no_error(helper_process_pay(df))
+})
+
+# Test if the function runs without error for a mix of numeric and categorical values
+test_that("Check that helper_process_pay runs with error for a mix of numeric and categorical values", {
+  df <- valid_trip_data
+  df$pay_meal = c(8, 1, "full", 12, 6)
+  df$pay_tour = c(8, 1, 0.5, "half", 6)
+  expect_error(helper_process_pay(df))
+})
+
+# Test if the function runs without error when there are NA values
+test_that("Check that helper_process_pay runs without error for NA values", {
+  df <- valid_trip_data
+  df$pay_meal = c(NA, NA, NA, NA, NA)
+  df$pay_tour = c(NA, NA, NA, NA, NA)
+  expect_error(helper_process_pay(df))
+})
+
+# Test if the function output contains only the 'name', 'activity', and 'pay' columns
+test_that("Output contains only 'name', 'activity', and 'pay'", {
+  df <- valid_trip_data
+  
+  # Process the data frame
+  processed_df <- helper_process_pay(df)
+  
+  # Get the names of the expected columns
+  expected_columns <- c("name", "activity", "pay")
+  
+  # Test if the column names are exactly as expected
+  expect_named(processed_df, expected_columns)
+})
+

@@ -167,161 +167,165 @@ costsplitter <- function(data = readr::read_csv(system.file("participants.csv", 
                         share_full = 1, 
                         share_reduced = 0.7, 
                         share_less = 0.8, 
-                        share_more = 1.2
+                        share_more = 1.2,
                          ...){
+# 
+# # Make sure that the columns are correctly takes as character
+# data <- rio::import(here::here("..", "Abrechnung.xlsx")) |>
+#         dplyr::tibble() |>
+#         dplyr::mutate(across(starts_with("share_"), as.character)) |>
+#         dplyr::mutate(across(starts_with("age"), as.character)) 
+# 
+# 
+# # Check if 'name' column exists and is unique
+#   if (!"name" %in% colnames(data)) {
+#     stop("The 'name' column is missing.")
+#   }
+# 
+#   if (anyDuplicated(data$name)) {
+#     stop("The 'name' column contains duplicate entries.")
+#   }
+# 
+#   # Check for at least one 'pay_' column
+#   pay_cols <- grep(paste0("^", var_pay), colnames(data), value = TRUE)
+#   if (length(pay_cols) == 0) {
+#     stop("At least one 'pay_' column must be present.")
+#   }
+# 
+#   # Validate 'age' column
+#   if ("age" %in% colnames(data)) {
+#     age_values <- data$age
+#     if (all(age_values %in% c(NA, "", "adult", "kid") | (is.numeric(age_values) & age_values <= 0 & age_values >= 120))) {
+#       stop("The 'age' column must be a number between 0 and 120, or 'adult' or 'kid'.")
+#     }
+#   }
+# 
+#   # Validate 'adjustment' column
+#   if ("adjustment" %in% colnames(data)) {
+#     adjustment_values <- data$adjustment
+#     if (all(!(adjustment_values %in% c(NA, "", "more", "less")) | (is.numeric(adjustment_values) & adjustment_values <= 0 & adjustment_values >= 100))) {
+#       stop("The 'adjustment' column must be a number between 0 and 100 or categorical ('more', 'less').")
+#     }
+#   }
+# 
+# 
+# 
+# # Convert shares to characters for case_when
+#   share_reduced_character = as.character(share_reduced)
+#   share_adult_character = as.character(share_adult * 18)
+#   share_kid_character = as.character(share_kid * 18)
+#   share_full_character = as.character(share_full)
+#   share_less_character = as.character(share_less)
+#   share_more_character = as.character(share_more)
+#   
+#   # Define patterns for adults and kids in both English and German
+#   adult_patterns <- tolower(c("adult", "adults", "erwachsene", "erwachsenen"))
+#   kid_patterns <- tolower(c("kid", "kids", "kind", "kinder"))
+# 
+# # Change categorical values to numerical values
+#   data <- data |>
+#     dplyr::mutate(across(tidyr::starts_with("share_"), ~ as.numeric(dplyr::case_when(
+#       is.na(.) | . == "" ~ "0",
+#       . == "full" ~ "1",
+#       . == "reduced" ~ share_reduced_character,
+#       TRUE ~ .
+#     )))) |>
+#     # Age
+#     dplyr::mutate(age = dplyr::case_when(
+#       is.na(.data$age) | .data$age == "" ~ "18",
+#       .data$age %in% adult_patterns ~ share_adult_character,
+#       .data$age %in% kid_patterns ~ share_kid_character,
+#       TRUE ~ .data$age
+#     )) |> 
+#     dplyr::mutate(age = as.numeric(.data$age)) |> 
+#     dplyr::mutate(age = round(.data$age * age_adjustment, 2)) |>
+#     # Adjustment
+#     dplyr::mutate(adjustment = dplyr::case_when(
+#       is.na(.data$adjustment) | .data$adjustment == "" ~ "1",
+#       .data$adjustment == "more" ~ share_more_character,
+#       .data$adjustment == "less" ~ share_less_character,
+#       TRUE ~ .data$adjustment
+#     )) |>
+#     dplyr::mutate(adjustment = as.numeric(.data$adjustment)) 
+# 
+# 
+# 
+# 
+#     # Reading in the data
+#     data <- data |>
+#         dplyr::mutate(across(starts_with("share_"), ~ . * .data$age * .data$adjustment)) 
+# 
+#     # Split the dataset into participants data and a dataset showing what everybody paid
+#     data_participants <- data |> 
+#         dplyr::select(.data$name, .data$group, dplyr::starts_with("share_")) |>
+#         tidyr::pivot_longer(cols = dplyr::starts_with("share_"), names_to = "activity", values_to = "costs") |>
+#         dplyr::mutate(activity = stringr::str_split_i(.data$activity, pattern = "_", 2))
+# 
+#     data_costs <- dplyr::left_join(
+#         names(data) |> 
+#             stringr::str_subset("^share_") |> 
+#             purrr::map_dfr(~ data |> 
+#                 dplyr::summarise(activity = .x, total_units = sum(.data[[.x]], na.rm = TRUE))) |>
+#             dplyr::mutate(activity = stringr::str_remove(.data$activity, "^share_")),
+#         names(data) |> 
+#             stringr::str_subset("^pay_") |>
+#             purrr::map_dfr(~ data |> 
+#                 dplyr::summarise(activity = .x, total_payed = sum(.data[[.x]], na.rm = TRUE))) |>
+#             dplyr::mutate(activity = stringr::str_remove(.data$activity, "^pay_")), by = "activity"
+#     ) |> 
+#     dplyr::mutate(cost_per_unit = .data$total_payed / .data$total_units) |>
+#     dplyr::select(.data$activity, .data$cost_per_unit)
+# 
+#     # Combine the dataset
+#     data_topay <- data_participants |>
+#         dplyr::left_join(data_costs, by = "activity") |>
+#         dplyr::mutate(topay = .data$costs * .data$cost_per_unit)
+# 
+#     # Get the data_topay and data_recieves
+#     data_topay <- if(pay_by == "group"){
+#         data_topay |>
+#             dplyr::group_by(.data$group) |>
+#             dplyr::summarise(to_pay = sum(.data$topay)) |>
+#             dplyr::rename(element = .data$group)
+#     } else {
+#         data_topay |>
+#             dplyr::group_by(.data$name) |>
+#             dplyr::summarise(to_pay = sum(.data$topay)) |>
+#             dplyr::rename(element = .data$name)
+#     }
+# 
+#     data_recieves <- if(pay_by == "group"){
+#         data |>
+#             dplyr::select(.data$group, dplyr::starts_with("pay_")) |>
+#             tidyr::pivot_longer(cols = dplyr::starts_with("pay"), names_to = "activity", values_to = "payed") |>
+#             dplyr::group_by(.data$group) |>
+#             dplyr::summarise(recieves = sum(.data$payed, na.rm = TRUE)) |>
+#             dplyr::rename(element = .data$group)
+#     } else {
+#         data |>
+#             dplyr::select(.data$name, dplyr::starts_with("pay_")) |>
+#             tidyr::pivot_longer(cols = dplyr::starts_with("pay"), names_to = "activity", values_to = "payed") |>
+#             dplyr::group_by(.data$name) |>
+#             dplyr::summarise(recieves = sum(.data$payed, na.rm = TRUE)) |>
+#             dplyr::rename(element = .data$name)
+#     }
+# 
+#     # Combine the data again
+#     data_tosplit <- data_topay |> 
+#         dplyr::left_join(data_recieves, by = "element") |>
+#         dplyr::mutate(to_pay = .data$to_pay - .data$recieves) |>
+#         dplyr::select(.data$element, .data$to_pay)
+# 
+#     # Apply the minimization function from above
+#     results <- minimize_payments(data_tosplit) 
 
-# Make sure that the columns are correctly takes as character
-data <- rio::import(here::here("..", "Abrechnung.xlsx")) |>
-        dplyr::tibble() |>
-        dplyr::mutate(across(starts_with("share_"), as.character)) |>
-        dplyr::mutate(across(starts_with("age"), as.character)) 
-
-
-# Check if 'name' column exists and is unique
-  if (!"name" %in% colnames(data)) {
-    stop("The 'name' column is missing.")
-  }
-
-  if (anyDuplicated(data$name)) {
-    stop("The 'name' column contains duplicate entries.")
-  }
-
-  # Check for at least one 'pay_' column
-  pay_cols <- grep(paste0("^", var_pay), colnames(data), value = TRUE)
-  if (length(pay_cols) == 0) {
-    stop("At least one 'pay_' column must be present.")
-  }
-
-  # Validate 'age' column
-  if ("age" %in% colnames(data)) {
-    age_values <- data$age
-    if (all(age_values %in% c(NA, "", "adult", "kid") | (is.numeric(age_values) & age_values <= 0 & age_values >= 120))) {
-      stop("The 'age' column must be a number between 0 and 120, or 'adult' or 'kid'.")
-    }
-  }
-
-  # Validate 'adjustment' column
-  if ("adjustment" %in% colnames(data)) {
-    adjustment_values <- data$adjustment
-    if (all(!(adjustment_values %in% c(NA, "", "more", "less")) | (is.numeric(adjustment_values) & adjustment_values <= 0 & adjustment_values >= 100))) {
-      stop("The 'adjustment' column must be a number between 0 and 100 or categorical ('more', 'less').")
-    }
-  }
-
-
-
-# Convert shares to characters for case_when
-  share_reduced_character = as.character(share_reduced)
-  share_adult_character = as.character(share_adult * 18)
-  share_kid_character = as.character(share_kid * 18)
-  share_full_character = as.character(share_full)
-  share_less_character = as.character(share_less)
-  share_more_character = as.character(share_more)
   
-  # Define patterns for adults and kids in both English and German
-  adult_patterns <- tolower(c("adult", "adults", "erwachsene", "erwachsenen"))
-  kid_patterns <- tolower(c("kid", "kids", "kind", "kinder"))
-
-# Change categorical values to numerical values
-  data <- data |>
-    dplyr::mutate(across(tidyr::starts_with("share_"), ~ as.numeric(dplyr::case_when(
-      is.na(.) | . == "" ~ "0",
-      . == "full" ~ "1",
-      . == "reduced" ~ share_reduced_character,
-      TRUE ~ .
-    )))) |>
-    # Age
-    dplyr::mutate(age = dplyr::case_when(
-      is.na(.data$age) | .data$age == "" ~ "18",
-      .data$age %in% adult_patterns ~ share_adult_character,
-      .data$age %in% kid_patterns ~ share_kid_character,
-      TRUE ~ .data$age
-    )) |> 
-    dplyr::mutate(age = as.numeric(.data$age)) |> 
-    dplyr::mutate(age = round(.data$age * age_adjustment, 2)) |>
-    # Adjustment
-    dplyr::mutate(adjustment = dplyr::case_when(
-      is.na(.data$adjustment) | .data$adjustment == "" ~ "1",
-      .data$adjustment == "more" ~ share_more_character,
-      .data$adjustment == "less" ~ share_less_character,
-      TRUE ~ .data$adjustment
-    )) |>
-    dplyr::mutate(adjustment = as.numeric(.data$adjustment)) 
-
-
-
-
-    # Reading in the data
-    data <- data |>
-        dplyr::mutate(across(starts_with("share_"), ~ . * .data$age * .data$adjustment)) 
-
-    # Split the dataset into participants data and a dataset showing what everybody paid
-    data_participants <- data |> 
-        dplyr::select(.data$name, .data$group, dplyr::starts_with("share_")) |>
-        tidyr::pivot_longer(cols = dplyr::starts_with("share_"), names_to = "activity", values_to = "costs") |>
-        dplyr::mutate(activity = stringr::str_split_i(.data$activity, pattern = "_", 2))
-
-    data_costs <- dplyr::left_join(
-        names(data) |> 
-            stringr::str_subset("^share_") |> 
-            purrr::map_dfr(~ data |> 
-                dplyr::summarise(activity = .x, total_units = sum(.data[[.x]], na.rm = TRUE))) |>
-            dplyr::mutate(activity = stringr::str_remove(.data$activity, "^share_")),
-        names(data) |> 
-            stringr::str_subset("^pay_") |>
-            purrr::map_dfr(~ data |> 
-                dplyr::summarise(activity = .x, total_payed = sum(.data[[.x]], na.rm = TRUE))) |>
-            dplyr::mutate(activity = stringr::str_remove(.data$activity, "^pay_")), by = "activity"
-    ) |> 
-    dplyr::mutate(cost_per_unit = .data$total_payed / .data$total_units) |>
-    dplyr::select(.data$activity, .data$cost_per_unit)
-
-    # Combine the dataset
-    data_topay <- data_participants |>
-        dplyr::left_join(data_costs, by = "activity") |>
-        dplyr::mutate(topay = .data$costs * .data$cost_per_unit)
-
-    # Get the data_topay and data_recieves
-    data_topay <- if(pay_by == "group"){
-        data_topay |>
-            dplyr::group_by(.data$group) |>
-            dplyr::summarise(to_pay = sum(.data$topay)) |>
-            dplyr::rename(element = .data$group)
-    } else {
-        data_topay |>
-            dplyr::group_by(.data$name) |>
-            dplyr::summarise(to_pay = sum(.data$topay)) |>
-            dplyr::rename(element = .data$name)
-    }
-
-    data_recieves <- if(pay_by == "group"){
-        data |>
-            dplyr::select(.data$group, dplyr::starts_with("pay_")) |>
-            tidyr::pivot_longer(cols = dplyr::starts_with("pay"), names_to = "activity", values_to = "payed") |>
-            dplyr::group_by(.data$group) |>
-            dplyr::summarise(recieves = sum(.data$payed, na.rm = TRUE)) |>
-            dplyr::rename(element = .data$group)
-    } else {
-        data |>
-            dplyr::select(.data$name, dplyr::starts_with("pay_")) |>
-            tidyr::pivot_longer(cols = dplyr::starts_with("pay"), names_to = "activity", values_to = "payed") |>
-            dplyr::group_by(.data$name) |>
-            dplyr::summarise(recieves = sum(.data$payed, na.rm = TRUE)) |>
-            dplyr::rename(element = .data$name)
-    }
-
-    # Combine the data again
-    data_tosplit <- data_topay |> 
-        dplyr::left_join(data_recieves, by = "element") |>
-        dplyr::mutate(to_pay = .data$to_pay - .data$recieves) |>
-        dplyr::select(.data$element, .data$to_pay)
-
-    # Apply the minimization function from above
-    results <- minimize_payments(data_tosplit) 
-
-    return(results)
+  
+  
+    # return(results)
 }
 ```
+
 
 ```{r example-costsplitter}
 result <- costsplitter(pay_by = "group")
@@ -336,3 +340,499 @@ testthat::test_that("The function divide costs works properly with internal data
 
 ```
 
+
+
+```{r}
+costsplitter2 <- function(df = valid_trip_data){
+  
+  data_age <- helper_process_age(df)
+  data_adjustment <- helper_process_adjustment(df)
+  data_share <- helper_process_share(df)
+  data_pay <- helper_process_pay(df)
+}
+```
+
+
+
+```{r function-helper_process_age}
+#' Process Age Data in a Data Frame
+#'
+#' The `helper_process_age` function processes the `age` column in a given data frame. It performs assertive tests to validate the data, converts categorical age values ("adult" and "kid") into numeric equivalents, and scales numeric age values according to specified rules. Additionally, it pivots the data to transform share columns into long format and extracts activities.
+#'
+#' @param df A data frame containing an `age` column and other columns that start with "share". The `age` column can contain numeric values (0-120) or categorical values ("adult" or "kid").
+#'
+#' @return A tibble with three columns: `name`, `activity`, and `age`. The age values are transformed based on the rules provided, and the data is pivoted to a long format.
+#'
+#' @details 
+#' The function performs the following steps:
+#' 1. **Assertive Tests**: Validates that the `age` column exists and that it contains only numeric values (0-120) or the categorical values "adult" and "kid".
+#' 2. **Conversion**:
+#'    - Converts "adult" to 1 and "kid" to 0.5.
+#'    - Replaces `NA` and empty values with 1.
+#'    - Scales numeric values above 1 by dividing by 18.
+#' 3. **Data Transformation**: Pivots columns that start with "share" into a long format with `activity` and `age` columns.
+#'
+#' @importFrom assertthat assert_that
+#' @importFrom tidyr pivot_longer
+#' @importFrom dplyr mutate select as_tibble
+#' @importFrom stringr str_split_i
+#'
+#' @export
+helper_process_age <- function(df) {
+  
+  # -----Assertive tests-------------------------------------------------
+  # Assertive tests preparation
+  data_test_categorical <- df$age[suppressWarnings(is.na(as.numeric(df$age)))]
+  data_test_categorical <- data_test_categorical[!is.na(data_test_categorical)]
+  data_test_categorical <- data_test_categorical[data_test_categorical != ""]
+  data_test_numerical <- as.numeric(df$age[suppressWarnings(!is.na(as.numeric(df$age)))])
+  
+  # Check if age is present
+  assertthat::assert_that("age" %in% names(df), msg = "The dataframe must contain an 'age' column.")
+  
+  # Check the categorical part
+  assertthat::assert_that(all(data_test_categorical %in% c("adult", "kid") ) || length(data_test_categorical) == 0 , msg = "The age column can contain categorical values, but they must be either 'adult' or 'kid'")
+  
+  # Check the numerical part
+  assertthat::assert_that(all(is.numeric(data_test_numerical) & data_test_numerical <=120 & data_test_numerical >=0) || length(data_test_categorical) == 0, msg = "The age column can be numeric but the values must be from 0 to 120")
+
+  
+  # -----------Conversions-------------------------------------------
+  # Convert age to character to handle all types properly
+  df$age <- as.character(df$age)
+  
+  # Replace categorical values with numeric equivalents
+  df$age[df$age == "adult"] <- 1
+  df$age[df$age == "kid"] <- 0.5
+  
+  # Replace NAs and empty values with 1
+  df$age[df$age == "" | is.na(df$age)] <- 1
+  
+  # Convert age to numeric
+  df$age <- as.numeric(df$age)
+  
+  # Scale down ages greater than 1 to a fraction (age * 1/18)
+  df$age[df$age > 1] <- df$age[df$age > 1] * (1/18)
+  
+  # ------Pivot longer ------------------------------------------------
+  df <- df |> 
+    tidyr::pivot_longer(cols = starts_with("share"), names_to = "activity", values_to = "delete") |> 
+    dplyr::mutate(activity = stringr:: str_split_i(pattern = "_", activity, i = 2)) |> 
+    dplyr::select(name, activity, age) |> 
+    dplyr::as_tibble()
+  
+  return(df)
+}
+
+
+```
+
+```{r example-helper_process_age}
+df <- valid_trip_data
+data_age <- helper_process_age(df)
+```
+
+```{r test-helper_process_age}
+testthat::test_that("Check that helper_process_age runs without error", {
+  df <- valid_trip_data
+  df$age <- c("adult", "adult", "kid", "kid", "kid")
+  testthat::expect_no_error(helper_process_age(df))
+})
+
+
+testthat::test_that("Check that helper_process_age runs without error", {
+  df <- valid_trip_data
+  df$age <- c(1,3,4,6,7)
+  testthat::expect_no_error(helper_process_age(df))
+})
+
+testthat::test_that("Check that helper_process_age runs without error", {
+  df <- valid_trip_data
+  df$age <- c(1,3,"adult",6,7)
+  testthat::expect_no_error(helper_process_age(df))
+})
+
+
+testthat::test_that("Check that helper_process_age runs without error", {
+  df <- valid_trip_data
+  df$age <- c(1,3,"adult",NA,7)
+  testthat::expect_no_error(helper_process_age(df))
+})
+
+
+testthat::test_that("Output contains only 'name', 'activity', and 'age'", {
+  # Example output from your function
+  df <- helper_process_age(valid_trip_data)
+  
+  # Get the names of the expected columns
+  expected_columns <- c("name", "activity", "age")
+  
+  # Test if the column names are exactly as expected
+  testthat::expect_named(df, expected_columns)
+})
+
+```
+
+```{r function-helper_process_adjustment}
+#' Process Adjustment Data in a Data Frame
+#'
+#' The `helper_process_adjustment` function processes the `adjustment` column in a given data frame. It validates the data, converts categorical values ("more" and "less") into numeric equivalents, and handles missing values appropriately.
+#'
+#' @param df A data frame containing an `adjustment` column. The `adjustment` column can contain numeric values (0-100) or categorical values ("more" or "less").
+#'
+#' @return A data frame with the `adjustment` column transformed based on the rules provided.
+#'
+#' @details 
+#' The function performs the following steps:
+#' 1. **Assertive Tests**: Validates that the `adjustment` column exists and that it contains only numeric values (0-100) or the categorical values "more" and "less".
+#' 2. **Conversion**:
+#'    - Converts "more" to 1.2 and "less" to 0.8.
+#'    - Replaces `NA` and empty values with 1.
+#' 3. **Scaling**: Numeric values remain as is if they are within the range [0, 100].
+#'
+#' @importFrom assertthat assert_that
+#' @importFrom dplyr mutate as_tibble
+#'
+#' @export
+helper_process_adjustment <- function(df) {
+  
+  # ----- Assertive tests -------------------------------------------------
+  
+  # Separate categorical and numerical values
+  data_test_categorical <- df$adjustment[suppressWarnings(is.na(as.numeric(df$adjustment)))]
+  data_test_categorical <- data_test_categorical[!is.na(data_test_categorical)]
+  data_test_categorical <- data_test_categorical[data_test_categorical != ""]
+  data_test_numerical <- as.numeric(df$adjustment[suppressWarnings(!is.na(as.numeric(df$adjustment)))])
+  
+  # Check the categorical values
+  assertthat::assert_that(
+    all(data_test_categorical %in% c("more", "less")) || length(data_test_categorical) == 0,
+    msg = "The adjustment column can contain categorical values, but they must be either 'more' or 'less'."
+  )
+  
+  # Check the numerical values
+  assertthat::assert_that(
+    all(data_test_numerical <= 100 & data_test_numerical >= 0) || length(data_test_numerical) == 0,
+    msg = "The adjustment column can be numeric but the values must be from 0 to 100."
+  )
+  
+  # ----------- Conversions -------------------------------------------
+  # Convert adjustment to character to handle all types properly
+  df$adjustment <- as.character(df$adjustment)
+  
+  # Replace categorical values with numeric equivalents
+  df$adjustment[df$adjustment == "more"] <- 1.2
+  df$adjustment[df$adjustment == "less"] <- 0.8
+  
+  # Replace NAs and empty values with 1
+  df$adjustment[df$adjustment == "" | is.na(df$adjustment)] <- 1
+  
+  # Convert adjustment to numeric
+  df$adjustment <- as.numeric(df$adjustment)
+  
+  # ------Pivot longer ------------------------------------------------
+  df <- df |> 
+    tidyr::pivot_longer(cols = starts_with("share"), names_to = "activity", values_to = "delete") |> 
+    dplyr::mutate(activity = stringr:: str_split_i(pattern = "_", activity, i = 2)) |> 
+    dplyr::select(name, activity, adjustment) |> 
+    dplyr::as_tibble()
+  
+  return(df)
+}
+
+```
+
+```{r example-helper_process_adjustment}
+data_adjustment <- helper_process_adjustment(df = valid_trip_data)
+```
+
+```{r function-tests-helper_process_adjustment}
+
+# Test if the function runs without error for categorical values
+testthat::test_that("Check that helper_process_adjustment runs without error for categorical values", {
+  df <- valid_trip_data
+  df$adjustment <- c("more", "more", "less", "less", "more")
+  testthat::expect_no_error(helper_process_adjustment(df))
+})
+
+# Test if the function runs without error for numeric values within range
+testthat::test_that("Check that helper_process_adjustment runs without error for numeric values within range", {
+  df <- valid_trip_data
+  df$adjustment <- c(0, 10, 50, 70, 100)
+  testthat::expect_no_error(helper_process_adjustment(df))
+})
+
+# Test if the function runs without error for a mix of numeric and categorical values
+testthat::test_that("Check that helper_process_adjustment runs without error for a mix of numeric and categorical values", {
+  df <- valid_trip_data
+  df$adjustment <- c(10, "more", "less", 80, 0)
+  testthat::expect_no_error(helper_process_adjustment(df))
+})
+
+# Test if the function runs without error when there are NA values
+testthat::test_that("Check that helper_process_adjustment runs without error for NA values", {
+  df <- valid_trip_data
+  df$adjustment <- c(20, NA, "more", "", "less")
+  testthat::expect_no_error(helper_process_adjustment(df))
+})
+
+# Test if the function output contains only the 'name' and 'adjustment' columns (since no pivoting is applied here)
+testthat::test_that("Output contains only 'name' and 'adjustment'", {
+  # Example output from your function
+  df <- helper_process_adjustment(valid_trip_data)
+  
+  # Get the names of the expected columns
+  expected_columns <- c("name", "activity", "adjustment")
+  
+  # Test if the column names are exactly as expected
+  testthat::expect_named(df, expected_columns)
+})
+
+```
+
+```{r function-helper_process_share}
+#' Process Share Data in a Data Frame
+#'
+#' The `helper_process_share` function processes the `share` columns in a given data frame. It pivots the share columns into a long format, validates the data, and converts categorical share values into numeric equivalents. The function also replaces missing or empty values with 0.
+#'
+#' @param df A data frame containing columns that start with "share" and a `name` column. The share columns can contain numeric values (0-1) or categorical values ("full", "reduced", "half", "some").
+#'
+#' @return A tibble with three columns: `name`, `activity`, and `share`. The share values are transformed based on the rules provided, and the data is pivoted to a long format.
+#'
+#' @details 
+#' The function performs the following steps:
+#' 1. **Pivoting**: Converts the wide format share columns into a long format with `activity` and `share` columns.
+#' 2. **Assertive Tests**: Validates that the `share` column contains only numeric values (0-1) or the specified categorical values ("full", "reduced", "half", "some").
+#' 3. **Conversion**:
+#'    - Converts categorical values ("full", "reduced", "half", "some") into numeric equivalents (1, 0.7, 0.5, 0.3).
+#'    - Replaces `NA` and empty values with 0.
+#' 4. **Transformation**: Ensures that the `share` column is numeric and returns the modified data frame as a tibble.
+#'
+#' @importFrom assertthat assert_that
+#' @importFrom tidyr pivot_longer
+#' @importFrom dplyr mutate select as_tibble
+#' @importFrom stringr str_split_i
+#'
+#' @export
+helper_process_share <- function(df) {
+  
+  df <- df |> 
+    tidyr::pivot_longer(starts_with("share"), names_to = "activity", values_to = "share") |> 
+        dplyr::mutate(activity = stringr:: str_split_i(pattern = "_", activity, i = 2)) |> 
+    select(name, activity, share)
+  
+  
+  # -----Assertive tests-------------------------------------------------
+  # Assertive tests preparation
+  data_test_categorical <- df$share[suppressWarnings(is.na(as.numeric(df$share)))]
+  data_test_categorical <- data_test_categorical[!is.na(data_test_categorical)]
+  data_test_categorical <- data_test_categorical[data_test_categorical != ""]
+  data_test_numerical <- as.numeric(df$share[suppressWarnings(!is.na(as.numeric(df$share)))])
+  
+  # Check the categorical part
+  assertthat::assert_that(all(data_test_categorical %in% c("full", "reduced", "half", "some") ) || length(data_test_categorical) == 0 , msg = "The share column can contain categorical values, but they must be either 'full', 'reduced', 'half', 'some' ")
+  
+  # Check the numerical part
+  assertthat::assert_that(all(is.numeric(data_test_numerical) & data_test_numerical <=100 & data_test_numerical >=0) || length(data_test_categorical) == 0, msg = "The share column can be numeric but the values must be from 0 to 100")
+
+  
+  # -----------Conversions-------------------------------------------
+  # Convert age to character to handle all types properly
+  df$share <- as.character(df$share)
+  
+  # Replace categorical values with numeric equivalents
+  df$share[df$share == "full"] <- 1
+  df$share[df$share == "reduced"] <- 0.7
+  df$share[df$share == "half"] <- 0.5
+  df$share[df$share == "some"] <- 0.3
+  
+  # Replace NAs and empty values with 0
+  df$share[df$share == "" | is.na(df$share)] <- 0
+  
+  # Convert share to numeric
+  df$share <- as.numeric(df$share)
+  
+  
+  df <- df |> 
+    dplyr::as_tibble()
+  
+  return(df)
+}
+
+
+```
+
+```{r example-helper_process_share}
+df <- valid_trip_data
+data_share <- helper_process_share(df)
+```
+
+```{r test-helper_process_share}
+library(testthat)
+
+# Test if the function runs without error for categorical values
+test_that("Check that helper_process_share runs without error for categorical values", {
+  df <- valid_trip_data
+  df$share_meal = c("full", "full", "reduced", "half", "some")
+  df$share_tour = c("full", "half", "reduced", "full", "some")
+  expect_no_error(helper_process_share(df))
+})
+
+# Test if the function runs without error for numeric values within range
+test_that("Check that helper_process_share runs without error for numeric values within range", {
+  df <- valid_trip_data
+  df$share_meal = c(8, 1, 0.5, 12, 6)
+  df$share_tour = c(8, 1, 0.5, 12, 6)
+
+  expect_no_error(helper_process_share(df))
+})
+
+# Test if the function runs without error for a mix of numeric and categorical values
+test_that("Check that helper_process_share runs without error for a mix of numeric and categorical values", {
+  df <- valid_trip_data
+  df$share_meal = c(8, 1, "full", 12, 6)
+  df$share_tour = c(8, 1, 0.5, "half", 6)
+  expect_no_error(helper_process_share(df))
+})
+
+# Test if the function runs without error when there are NA values
+test_that("Check that helper_process_share runs without error for NA values", {
+    df <- valid_trip_data
+  df$share_meal = c(8, 1, "full", "", 6)
+  df$share_tour = c(8, 1, 0.5, "half", NA)
+  expect_no_error(helper_process_share(df))
+})
+
+# Test if the function output contains only the 'name', 'activity', and 'share' columns
+test_that("Output contains only 'name', 'activity', and 'share'", {
+  df <- data.frame(
+    name = c("John", "Jane", "Alex", "Kate", "Tom"),
+    share_activity_walking = c(0.5, "full", "reduced", 0.7, "half"),
+    share_activity_running = c("some", 0.3, 1, "full", 0.5)
+  )
+  
+  # Process the data frame
+  processed_df <- helper_process_share(df)
+  
+  # Get the names of the expected columns
+  expected_columns <- c("name", "activity", "share")
+  
+  # Test if the column names are exactly as expected
+  expect_named(processed_df, expected_columns)
+})
+
+```
+
+
+```{r function-helper_process_pay}
+#' Process Share Data in a Data Frame
+#'
+#' The `helper_process_share` function processes the `share` columns in a given data frame. It pivots the share columns into a long format, validates the data, and converts categorical share values into numeric equivalents. The function also replaces missing or empty values with 0.
+#'
+#' @param df A data frame containing columns that start with "share" and a `name` column. The share columns can contain numeric values (0-1) or categorical values ("full", "reduced", "half", "some").
+#'
+#' @return A tibble with three columns: `name`, `activity`, and `share`. The share values are transformed based on the rules provided, and the data is pivoted to a long format.
+#'
+#' @details 
+#' The function performs the following steps:
+#' 1. **Pivoting**: Converts the wide format share columns into a long format with `activity` and `share` columns.
+#' 2. **Assertive Tests**: Validates that the `share` column contains only numeric values (0-1) or the specified categorical values ("full", "reduced", "half", "some").
+#' 3. **Conversion**:
+#'    - Converts categorical values ("full", "reduced", "half", "some") into numeric equivalents (1, 0.7, 0.5, 0.3).
+#'    - Replaces `NA` and empty values with 0.
+#' 4. **Transformation**: Ensures that the `share` column is numeric and returns the modified data frame as a tibble.
+#'
+#' @importFrom assertthat assert_that
+#' @importFrom tidyr pivot_longer
+#' @importFrom dplyr mutate select as_tibble
+#' @importFrom stringr str_split_i
+#'
+#' @export
+helper_process_pay <- function(df) {
+  
+  df <- df |> 
+    tidyr::pivot_longer(starts_with("pay"), names_to = "activity", values_to = "pay") |> 
+        dplyr::mutate(activity = stringr:: str_split_i(pattern = "_", activity, i = 2)) |> 
+    select(name, activity, pay)
+  
+  
+  # -----Assertive tests-------------------------------------------------
+    # Check the categorical part
+  assertthat::assert_that(all(is.numeric(df$pay)) || all(is.na(df$pay)) , msg = "The pay column must be numeric or only NA")
+  
+  # Check the categorical part
+  assertthat::assert_that(all(df |> 
+                                group_by(activity) |> 
+                                summarise(sum = sum(pay)) |> 
+                                pull(sum) > 0) , msg = "For each activity there must be at least somebody who paied.")
+
+  
+  # ----- Conversions -------------------------------------------------    
+  # Replace NAs and empty values with 0
+  df$pay[df$pay == "" | is.na(df$pay)] <- 0
+  
+  df <- df |> 
+    dplyr::as_tibble()
+  
+  return(df)
+}
+
+
+```
+
+```{r example-helper_process_pay}
+df <- valid_trip_data
+data_pay <- helper_process_pay(df)
+```
+
+```{r test-helper_process_pay}
+library(testthat)
+
+# Test if the function runs without error for categorical values
+testthat::test_that("Check that helper_process_pay runs an error for categorical values", {
+  df <- valid_trip_data
+  df$pay_meal = c("full", "full", "reduced", "half", "some")
+  df$pay_tour = c("full", "half", "reduced", "full", "some")
+  expect_error(helper_process_pay(df))
+})
+
+# Test if the function runs without error for numeric values within range
+test_that("Check that helper_process_pay runs without error for numeric values", {
+  df <- valid_trip_data
+  df$pay_meal = c(8, 1, 0.5, 12, 6)
+  df$pay_tour = c(8, 1, 0.5, 12, 6)
+
+  expect_no_error(helper_process_pay(df))
+})
+
+# Test if the function runs without error for a mix of numeric and categorical values
+test_that("Check that helper_process_pay runs with error for a mix of numeric and categorical values", {
+  df <- valid_trip_data
+  df$pay_meal = c(8, 1, "full", 12, 6)
+  df$pay_tour = c(8, 1, 0.5, "half", 6)
+  expect_error(helper_process_pay(df))
+})
+
+# Test if the function runs without error when there are NA values
+test_that("Check that helper_process_pay runs without error for NA values", {
+  df <- valid_trip_data
+  df$pay_meal = c(NA, NA, NA, NA, NA)
+  df$pay_tour = c(NA, NA, NA, NA, NA)
+  expect_error(helper_process_pay(df))
+})
+
+# Test if the function output contains only the 'name', 'activity', and 'pay' columns
+test_that("Output contains only 'name', 'activity', and 'pay'", {
+  df <- valid_trip_data
+  
+  # Process the data frame
+  processed_df <- helper_process_pay(df)
+  
+  # Get the names of the expected columns
+  expected_columns <- c("name", "activity", "pay")
+  
+  # Test if the column names are exactly as expected
+  expect_named(processed_df, expected_columns)
+})
+
+```

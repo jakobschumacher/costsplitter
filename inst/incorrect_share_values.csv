@@ -1,0 +1,5 @@
+name,group,age,pay_meal,share_meal,pay_tour,share_tour,adjustment
+Frank,Gamma,35,20,1.5,30,invalid,
+George,Gamma,40,20,full,0,more,
+Hannah,Delta,22,0,-0.2,30,full,less
+Irene,Delta,30,30,full,40,1.2,

@@ -1,0 +1,5 @@
+name,group,pay_meal,share_meal,pay_tour,share_tour,adjustment
+Jack,Epsilon,25,full,50,0.8,more
+Kelly,Zeta,30,0.5,20,0.5,
+Liam,Epsilon,10,full,0,full,less
+Mia,Zeta,0,full,25,0.7,

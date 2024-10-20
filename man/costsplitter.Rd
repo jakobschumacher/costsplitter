@@ -7,7 +7,17 @@
 costsplitter(
   data = readr::read_csv(system.file("participants.csv", package = "costsplitter"),
     show_col_types = FALSE),
-  pay_by = "individual"
+  pay_by = "individual",
+  var_pay = "pay_",
+  var_share = "share_",
+  age_adjustment = (1/18),
+  share_adult = 1,
+  share_kid = 0.5,
+  share_full = 1,
+  share_reduced = 0.7,
+  share_less = 0.8,
+  share_more = 1.2,
+  ...
 )
 }
 \arguments{
@@ -25,4 +35,7 @@ and returns the amounts to be paid after applying any payments that have already
 }
 \examples{
 result <- costsplitter(pay_by = "group")
+
+df <- valid_trip_data
+helper_process_age(df)
 }

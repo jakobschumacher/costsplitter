@@ -24,38 +24,6 @@ library(costsplitter)
 # This is the documentation of all functions of the package
 
 
-## Function to check the costsplitter data
-This is a helper function that reads in the data from the participant file
-
-```{r examples-check_costsplitter_data}
-library(dplyr)
-library(stringr)
-data <- data.frame(
-  name = c("Alice", "Bob", "Charlie"),
-  pay_breakfast = c(20, 0, 10),
-  share_breakfast = c(1, "half", "full"),
-  age = c(30, "kid", NA),
-  adjustment = c("more", NA, "less")
-)
-
-check_costsplitter_data(data)
-
-```
-
-
-
-
-## Function to change the categorical values to numerical values 
-This is a helper function that is used in the check_costsplitter_data function. In the cost variables we accept categorical values. These categorical values need to be turned into numeric values 
-
-```{r examples-cat_to_num}
-data_participants = check_costsplitter_data() |> cat_to_num()
-
-```
-
-
-
-
 
 ## Function to minimize payments between payers and recievers
 This is a helper function. Some people will recieve money and others will need to pay money. We need to match these payers and recievers. We do this and try to reduce the number of overall payments. 
@@ -80,5 +48,48 @@ minimize_payments(df)
 result <- costsplitter(pay_by = "group")
 ```
 
+
+
+
+```{r}
+costsplitter2 <- function(df = valid_trip_data){
+  
+  data_age <- helper_process_age(df)
+  data_adjustment <- helper_process_adjustment(df)
+  data_share <- helper_process_share(df)
+  data_pay <- helper_process_pay(df)
+}
+```
+
+
+
+
+```{r example-helper_process_age}
+df <- valid_trip_data
+data_age <- helper_process_age(df)
+```
+
+
+
+
+```{r example-helper_process_adjustment}
+data_adjustment <- helper_process_adjustment(df = valid_trip_data)
+```
+
+
+
+
+```{r example-helper_process_share}
+df <- valid_trip_data
+data_share <- helper_process_share(df)
+```
+
+
+
+
+```{r example-helper_process_pay}
+df <- valid_trip_data
+data_pay <- helper_process_pay(df)
+```
 
 

@@ -1,0 +1,5 @@
+name,group,age,pay_meal,share_meal,pay_tour,share_tour,adjustment,extra_col1,extra_col2
+Nina,Theta,28,40,full,0,0.6,,info1,123
+Olivia,Theta,15,0,0.8,20,half,,info2,456
+Paul,Lambda,adult,25,full,10,some,less,info3,789
+Quincy,Lambda,40,30,0.5,50,full,,info4,12

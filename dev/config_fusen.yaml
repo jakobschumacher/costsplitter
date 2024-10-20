@@ -2,13 +2,10 @@ flat_money_transfer.Rmd:
   path: dev/flat_money_transfer.Rmd
   state: active
   R:
-  - R/cat_to_num.R
-  - R/check_costsplitter_data.R
   - R/costsplitter.R
   - R/minimize_payments.R
+  - R/function-to-give-you-amount-each-has-to-pay.R
   tests:
-  - tests/testthat/test-check_costsplitter_data.R
-  - tests/testthat/test-cat_to_num.R
   - tests/testthat/test-minimize_payments.R
   - tests/testthat/test-costsplitter.R
   vignettes: vignettes/divide-costs-fairly-amongst-friends.Rmd
