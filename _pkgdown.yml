@@ -1,4 +1,13 @@
-url: http://jakobschumacher.github.io/dividefairly
+url: http://jakobschumacher.github.io/costsplitter
 template:
   bootstrap: 5
+  bootswatch: materia
 
+reference:
+  - title: "Main Functions"
+  - contents:
+    - starts_with("costsplitter")
+
+  - title: "Helper Functions"
+  - contents:
+    - starts_with("helper")

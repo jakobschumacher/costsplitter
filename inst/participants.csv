@@ -1,4 +1,4 @@
-id,name,group,age,cost_dinnerday1,pay_dinnerday1,cost_day1,pay_day1,cost_day2,pay_day2,cost_day3,pay_day3,adjustment
+id,name,group,age,share_dinnerday1,pay_dinnerday1,share_day1,pay_day1,share_day2,pay_day2,share_day3,pay_day3,adjustment
 1,James Smith,Smith,adult,full,,full,,full,,full,,NA
 2,Olivia Johnson,Johnson,NA,NA,,0.8,,full,,full,,less
 3,Ethan Brown,Brown,3,full,,full,,full,,full,,NA

@@ -18,6 +18,26 @@
 
 
 
+#' Example Data: Participants
+#'
+#' This dataset contains complete and valid information for testing the `costsplitter` package.
+#' It follows all requirements, including proper columns for names, group, age, payments, shares, and adjustments.
+#'
+#' @format A data frame with 5 rows and 8 variables:
+#' \describe{
+#'   \item{name}{Participant's name, unique.}
+#'   \item{group}{Group identifier for participants.}
+#'   \item{age}{Age of the participant; can be numeric, 'adult', or 'kid'.}
+#'   \item{pay_meal}{Amount paid by the participant for a meal.}
+#'   \item{share_meal}{Proportion of meal cost each participant is responsible for.}
+#'   \item{pay_tour}{Amount paid by the participant for a tour.}
+#'   \item{share_tour}{Proportion of tour cost each participant is responsible for.}
+#'   \item{adjustment}{Adjustments to be applied to each participant's cost.}
+#' }
+"participants"
+
+
+
 
 #' Example Data: Missing Columns Data
 #'

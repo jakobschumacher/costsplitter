@@ -1,16 +1,16 @@
 flat_money_transfer.Rmd:
-  path: dev/flat_money_transfer.Rmd
-  state: active
+  path: dev/flat_history/flat_money_transfer.Rmd
+  state: deprecated
   R:
-  - R/costsplitter.R
+  - R/helper_process_age.R
   - R/minimize_payments.R
-  - R/function-to-give-you-amount-each-has-to-pay.R
+  - R/helper-functions.R
   tests:
   - tests/testthat/test-minimize_payments.R
-  - tests/testthat/test-costsplitter.R
+  - tests/testthat/test-helper_process_age.R
   vignettes: vignettes/divide-costs-fairly-amongst-friends.Rmd
   inflate:
-    flat_file: dev/flat_money_transfer.Rmd
+    flat_file: dev/flat_history/flat_money_transfer.Rmd
     vignette_name: Divide costs fairly amongst friends
     open_vignette: true
     check: true

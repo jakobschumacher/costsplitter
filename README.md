@@ -16,7 +16,7 @@ By considering these variables, `costsplitter` calculates a fair distribution of
 So you are convinced that this package is something for you? You want to give it a try? Go ahead. Follow the following steps to divide the costs of an activity fair amongst all participants
 
 
-## Step 1: Installation
+## Installation
 
 ``` r
 # Install the package from github
@@ -48,20 +48,5 @@ Here is an example of a suitable dataset.
 |Lucas Wilson   |Wilson  |adult |NA        |       NA|NA        |       NA|NA         |
 |Emma Davis     |Smith   |NA    |full      |      800|full      |       NA|NA         |
 
-## Step 3: Do the analysis
- This is the easy part. If the input files are in structured in the right way, all you need to do is run:
-
-```r
-
-# Load the package
-library(costsplitter)
-
-# Read in the data
-data <- read.csv('your_data_set.csv')
-
-# Do the analysis
-costsplitter(data)
-
-```
 
 What this will do is: It reads in the files, checks if the files are structured in the right way, changes categorical values into numerical values, then it calculates a weight based on the age, adjustment and the grade of involvement. In the end it gives out the amount that everybody needs to pay and whom the money should be paid.

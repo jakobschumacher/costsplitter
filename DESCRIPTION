@@ -1,29 +1,26 @@
 Package: costsplitter
 Title: Divide Costs Fairly Amongst Friends
-Version: 0.5
+Version: 0.7
 Authors@R: 
     person("Jakob", "Schumacher", , "jakob.schumacher@web.de", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-9894-6085"))
-Description: Do the accounting of a group trip.
+Description: The package `costsplitter` is an R package designed to simplify the task of splitting costs for group activities.
 License: GPL (>= 3)
 Depends: 
     R (>= 2.10)
 Imports: 
+    assertthat,
     dplyr,
-    here,
     magrittr,
-    purrr,
-    readr,
-    rio,
     rlang,
     stringr,
     tidyr
 Suggests: 
-    assertthat,
     knitr,
     rmarkdown,
     testthat
-VignetteBuilder: knitr
+VignetteBuilder: 
+    knitr
 Config/fusen/version: 0.6.0
 Encoding: UTF-8
 LazyData: true
