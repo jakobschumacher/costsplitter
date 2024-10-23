@@ -24,4 +24,4 @@ valid_trip_data
 This dataset contains complete and valid information for testing the \code{costsplitter} package.
 It follows all requirements, including proper columns for names, group, age, payments, shares, and adjustments.
 }
-\keyword{datasets}
+\keyword{internal}

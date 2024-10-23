@@ -35,3 +35,13 @@ data_pay <- helper_process_pay(df)
 
 
 }
+\seealso{
+Other helper: 
+\code{\link{helper_check_names}()},
+\code{\link{helper_minimize_payments}()},
+\code{\link{helper_process_adjustment}()},
+\code{\link{helper_process_age}()},
+\code{\link{helper_process_name}()},
+\code{\link{helper_process_share}()}
+}
+\concept{helper}

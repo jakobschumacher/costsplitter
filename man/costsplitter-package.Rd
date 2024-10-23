@@ -2,11 +2,10 @@
 % Please edit documentation in R/costsplitter-package.R
 \docType{package}
 \name{costsplitter-package}
-\alias{costsplitter}
 \alias{costsplitter-package}
 \title{costsplitter: Divide Costs Fairly Amongst Friends}
 \description{
-Do the accounting of a group trip.
+The package `costsplitter` is an R package designed to simplify the task of splitting costs for group activities.
 }
 \author{
 \strong{Maintainer}: Jakob Schumacher \email{jakob.schumacher@web.de} (\href{https://orcid.org/0000-0002-9894-6085}{ORCID})

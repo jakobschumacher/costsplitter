@@ -13,4 +13,4 @@ extra_unexpected_columns
 \description{
 This dataset includes extra columns that are not recognized by the package, testing if it can ignore unnecessary data without affecting calculations.
 }
-\keyword{datasets}
+\keyword{internal}

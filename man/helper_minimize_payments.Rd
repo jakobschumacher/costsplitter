@@ -4,7 +4,7 @@
 \alias{helper_minimize_payments}
 \title{Minimize Payments Between persons}
 \usage{
-helper_minimize_payments(df = data_tosplit)
+helper_minimize_payments(df)
 }
 \arguments{
 \item{df}{A tibble or data frame with two columns:
@@ -37,3 +37,13 @@ df <- dplyr::tibble(
 helper_minimize_payments(df)
 
 }
+\seealso{
+Other helper: 
+\code{\link{helper_check_names}()},
+\code{\link{helper_process_adjustment}()},
+\code{\link{helper_process_age}()},
+\code{\link{helper_process_name}()},
+\code{\link{helper_process_pay}()},
+\code{\link{helper_process_share}()}
+}
+\concept{helper}

@@ -34,9 +34,9 @@ helper_process_name <- function(df) {
 
   # -----------Conversions-------------------------------------------
   df <- df |>
-    tidyr::pivot_longer(starts_with("share"), names_to = "activity", values_to = "share") |>
+    tidyr::pivot_longer(dplyr::starts_with("share"), names_to = "activity", values_to = "share") |>
     dplyr::mutate(activity = stringr::str_split_i(pattern = "_", .data$activity, i = 2)) |>
-    select(name, group, activity) |>
+    dplyr::select(.data$name, .data$group, .data$activity)  |>
     dplyr::as_tibble()
 
   return(df)

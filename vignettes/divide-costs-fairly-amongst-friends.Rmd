@@ -65,7 +65,7 @@ You will receive a table that will look something like the table below. You can 
 library(costsplitter)
 
 # data("valid_trip_data", package = "costsplitter")
-
-costsplitter(valid_trip_data, pay_by = "individual")
+# 
+# costsplitter(valid_trip_data, pay_by = "individual")
 
 ```

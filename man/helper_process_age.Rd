@@ -4,7 +4,7 @@
 \alias{helper_process_age}
 \title{Process Age Data in a Data Frame}
 \usage{
-helper_process_age(df)
+helper_process_age(df = helper_check_names(df))
 }
 \arguments{
 \item{df}{A data frame containing an \code{age} column and other columns that start with "share". The \code{age} column can contain numeric values (0-120) or categorical values ("adult" or "kid").}
@@ -33,6 +33,14 @@ data("valid_trip_data", package = "costsplitter")
 df <- valid_trip_data
 data_age <- helper_process_age(df)
 
-# data("valid_trip_data", package = "costsplitter")
-# data_adjustment <- helper_process_adjustment(df = valid_trip_data)
 }
+\seealso{
+Other helper: 
+\code{\link{helper_check_names}()},
+\code{\link{helper_minimize_payments}()},
+\code{\link{helper_process_adjustment}()},
+\code{\link{helper_process_name}()},
+\code{\link{helper_process_pay}()},
+\code{\link{helper_process_share}()}
+}
+\concept{helper}

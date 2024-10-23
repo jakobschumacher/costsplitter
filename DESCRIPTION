@@ -14,6 +14,7 @@ Imports:
     magrittr,
     rlang,
     stringr,
+    tibble,
     tidyr
 Suggests: 
     knitr,

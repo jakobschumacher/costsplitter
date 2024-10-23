@@ -13,4 +13,4 @@ missing_columns_data
 \description{
 This dataset is missing the mandatory \code{name} column, designed to test how the package handles missing essential columns.
 }
-\keyword{datasets}
+\keyword{internal}

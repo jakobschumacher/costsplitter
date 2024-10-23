@@ -16,7 +16,6 @@
 #' 2. **Conversion**:
 #'    - Converts "more" to 1.2 and "less" to 0.8.
 #'    - Replaces `NA` and empty values with 1.
-#' 3. **Scaling**: Numeric values remain as is if they are within the range [0, 100].
 #'
 #' @importFrom assertthat assert_that
 #' @importFrom dplyr mutate as_tibble
@@ -69,9 +68,9 @@ helper_process_adjustment <- function(df = helper_check_names(df)) {
 
   # ------Pivot longer ------------------------------------------------
   df <- df |>
-    tidyr::pivot_longer(cols = starts_with("share"), names_to = "activity", values_to = "delete") |>
-    dplyr::mutate(activity = stringr::str_split_i(pattern = "_", activity, i = 2)) |>
-    dplyr::select(name, activity, adjustment) |>
+    tidyr::pivot_longer(cols = dplyr::starts_with("share"), names_to = "activity", values_to = "delete") |>
+    dplyr::mutate(activity = stringr::str_split_i(pattern = "_", .data$activity, i = 2)) |>
+    dplyr::select(.data$name, .data$activity, .data$adjustment) |>
     dplyr::as_tibble()
 
   return(df)

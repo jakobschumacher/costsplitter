@@ -4,7 +4,7 @@
 \alias{helper_process_share}
 \title{Process Share Data in a Data Frame}
 \usage{
-helper_process_share(df)
+helper_process_share(df = helper_check_names(df))
 }
 \arguments{
 \item{df}{A data frame containing columns that start with "share" and a \code{name} column. The share columns can contain numeric values (0-1) or categorical values ("full", "reduced", "half", "some").}
@@ -34,3 +34,13 @@ df <- valid_trip_data
 data_share <- helper_process_share(df)
 
 }
+\seealso{
+Other helper: 
+\code{\link{helper_check_names}()},
+\code{\link{helper_minimize_payments}()},
+\code{\link{helper_process_adjustment}()},
+\code{\link{helper_process_age}()},
+\code{\link{helper_process_name}()},
+\code{\link{helper_process_pay}()}
+}
+\concept{helper}

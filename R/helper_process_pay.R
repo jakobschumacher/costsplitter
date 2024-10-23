@@ -33,8 +33,8 @@
 helper_process_pay <- function(df) {
 
   df <- df |>
-    tidyr::pivot_longer(starts_with("pay"), names_to = "activity", values_to = "pay") |>
-    dplyr::mutate(activity = stringr::str_split_i(pattern = "_", activity, i = 2)) |>
+    tidyr::pivot_longer(dplyr::starts_with("pay"), names_to = "activity", values_to = "pay") |>
+    dplyr::mutate(activity = stringr::str_split_i(pattern = "_", .data$activity, i = 2)) |>
     dplyr::select(name, activity, pay)
 
 
@@ -44,8 +44,8 @@ helper_process_pay <- function(df) {
 
   # Check the categorical part
   assertthat::assert_that(all(df |>
-                                dplyr::group_by(activity) |>
-                                dplyr::summarise(sum = sum(pay, na.rm = TRUE)) |>
+                                dplyr::group_by(.data$activity) |>
+                                dplyr::summarise(sum = sum(.data$pay, na.rm = TRUE)) |>
                                 dplyr::filter(sum > 0) |>
                                 nrow() > 0), msg = "For each activity there must be at least somebody who paied.")
 

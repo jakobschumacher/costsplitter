@@ -4,7 +4,7 @@
 \alias{helper_process_adjustment}
 \title{Process Adjustment Data in a Data Frame}
 \usage{
-helper_process_adjustment(df)
+helper_process_adjustment(df = helper_check_names(df))
 }
 \arguments{
 \item{df}{A data frame containing an \code{adjustment} column. The \code{adjustment} column can contain numeric values (0-100) or categorical values ("more" or "less").}
@@ -24,7 +24,6 @@ The function performs the following steps:
 \item Converts "more" to 1.2 and "less" to 0.8.
 \item Replaces \code{NA} and empty values with 1.
 }
-\item \strong{Scaling}: Numeric values remain as is if they are within the range \link{0, 100}.
 }
 }
 \examples{
@@ -32,3 +31,13 @@ data("valid_trip_data", package = "costsplitter")
 data_adjustment <- helper_process_adjustment(df = valid_trip_data)
 
 }
+\seealso{
+Other helper: 
+\code{\link{helper_check_names}()},
+\code{\link{helper_minimize_payments}()},
+\code{\link{helper_process_age}()},
+\code{\link{helper_process_name}()},
+\code{\link{helper_process_pay}()},
+\code{\link{helper_process_share}()}
+}
+\concept{helper}

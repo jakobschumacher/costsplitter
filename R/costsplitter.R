@@ -5,10 +5,17 @@
 #' age, share, and adjustments.
 #'
 #' @param df A dataframe containing the cost data. The dataframe must have at least the following columns:
-#' `name`, `group`, `age`, columns starting with `"share"`, and columns for `adjustment` and `pay`.
+#' \itemize{
+#'   \item `name`: Name of the participant.
+#'   \item `group`: Group identifier.
+#'   \item `age`: Age of the participant.
+#'   \item Columns starting with `"share"`: Columns indicating the share of costs.
+#'   \item Columns for `adjustment` and `pay`: Columns indicating adjustments and payments.
+#' }
 #' @param pay_by A character string specifying whether the costs should be split by `"group"` (default) or `"individual"`.
 #' @return A dataframe with the total amount to pay per group or individual based on the specified criteria.
 #' @export
+#'
 #'
 #' @examples
 #' df <- tibble::tibble(
@@ -32,7 +39,7 @@ costsplitter <- function(df, pay_by = "group"){
     dplyr::left_join(helper_process_adjustment(df), by = dplyr::join_by(name, activity)) |>
     dplyr::left_join(helper_process_share(df), by = dplyr::join_by(name, activity)) |>
     dplyr::left_join(helper_process_pay(df), by = dplyr::join_by(name, activity)) |>
-    dplyr::mutate(weight = share * age * adjustment )
+    dplyr::mutate(weight = share * age * adjustment)
 
   data_complete <- data_clean |>
     dplyr::left_join(
@@ -51,24 +58,24 @@ costsplitter <- function(df, pay_by = "group"){
     dplyr::mutate(to_pay = weight * pay_per_share - pay)
 
   if(pay_by == "group"){
-  data_to_split <- data_complete |>
-    dplyr::group_by(group) |>
-    dplyr::summarise(to_pay = sum(to_pay)) |>
-    select(element = group, to_pay)
+    data_to_split <- data_complete |>
+      dplyr::group_by(group) |>
+      dplyr::summarise(to_pay = sum(to_pay)) |>
+      dplyr::select(element = group, to_pay)
   } else {
     data_to_split <- data_complete |>
       dplyr::group_by(name) |>
       dplyr::summarise(to_pay = sum(to_pay)) |>
-      select(element = name, to_pay)
+      dplyr::select(element = name, to_pay)
   }
 
   data_to_split <- helper_minimize_payments(data_to_split)
 
   data_to_split$amount <- round(data_to_split$amount)
 
-  # Arrange by name
+  # Arrange by payer
   data_to_split <- data_to_split |> dplyr::arrange(payer)
 
   return(data_to_split)
-
 }
+

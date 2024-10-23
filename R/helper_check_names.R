@@ -7,7 +7,10 @@
 #' @return A data frame with all the right columns
 #'
 #' @examples
-#' df <- helper_check_names(df)
+#' df <- helper_check_names(df =
+#'      tibble::tibble(name = c("Alice", "Alice", "Charlie"),
+#'                     share_tour = c(0.4, 0.6, 0.5),
+#'                     pay_tour = c(100,200,300)))
 #'
 #'
 #' @importFrom assertthat assert_that

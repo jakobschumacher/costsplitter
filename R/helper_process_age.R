@@ -19,6 +19,7 @@
 #' @importFrom tidyr pivot_longer
 #' @importFrom dplyr mutate select as_tibble
 #' @importFrom stringr str_split_i
+#' @importFrom rlang .data
 #'
 #' @examples
 #' data("valid_trip_data", package = "costsplitter")
@@ -71,10 +72,11 @@ helper_process_age <- function(df = helper_check_names(df)) {
 
   # ------Pivot longer ------------------------------------------------
   df <- df |>
-    tidyr::pivot_longer(cols = starts_with("share"), names_to = "activity", values_to = "delete") |>
-    dplyr::mutate(activity = stringr::str_split_i(pattern = "_", activity, i = 2)) |>
-    dplyr::select(name, activity, age) |>
+    tidyr::pivot_longer(cols = dplyr::starts_with("share"), names_to = "activity", values_to = "delete") |>
+    dplyr::mutate(activity = stringr::str_split_i(pattern = "_", .data$activity, i = 2)) |>
+    dplyr::select(.data$name, .data$activity, .data$age) |>
     dplyr::as_tibble()
+
 
   return(df)
 }
