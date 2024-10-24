@@ -1,7 +1,7 @@
-url: http://jakobschumacher.github.io/costsplitter
+url: https://jakobschumacher.github.io/costsplitter
 template:
   bootstrap: 5
-  bootswatch: materia
+  bootswatch: flatly
 
 reference:
   - title: "Main Functions"

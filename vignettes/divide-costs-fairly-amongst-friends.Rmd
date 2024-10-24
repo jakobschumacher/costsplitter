@@ -1,8 +1,8 @@
 ---
-title: "Divide costs fairly amongst friends"
+title: "Split costs fairly"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Divide costs fairly amongst friends}
+  %\VignetteIndexEntry{Split costs fairly}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -56,6 +56,8 @@ data <- read.csv('your_data_set.csv')
 costsplitter(data)
 
 ```
+What this will do is: It reads in the files, checks if the files are structured in the right way, changes categorical values into numerical values, then it calculates a weight based on the age, adjustment and the grade of involvement. In the end it gives out the amount that everybody needs to pay and whom the money should be paid.
+
 
 # Step 4: Communicate your findings
 You will receive a table that will look something like the table below. You can photograph this and send it to the others.
@@ -69,3 +71,4 @@ library(costsplitter)
 # costsplitter(valid_trip_data, pay_by = "individual")
 
 ```
+

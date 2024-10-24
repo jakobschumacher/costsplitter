@@ -19,7 +19,7 @@
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Divide Costs Fairly Amongst Friends">
 <meta name="description" content="The package `costsplitter` is an R package designed to simplify the task of splitting costs for group activities.">
 <meta property="og:description" content="The package `costsplitter` is an R package designed to simplify the task of splitting costs for group activities.">
-<meta property="og:image" content="http://jakobschumacher.github.io/costsplitter/logo.png">
+<meta property="og:image" content="https://jakobschumacher.github.io/costsplitter/logo.png">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -42,7 +42,7 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="articles/divide-costs-fairly-amongst-friends.html">Divide costs fairly amongst friends</a></li>
+<li><a class="dropdown-item" href="articles/divide-costs-fairly-amongst-friends.html">Split costs fairly</a></li>
   </ul>
 </li>
       </ul>
@@ -50,6 +50,7 @@
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="search.json">
 </form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/jakobschumacher/costsplitter/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
 
@@ -59,7 +60,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header">
-<img src="logo.png" class="logo" alt=""><h1 id="whats-this-package-costsplitter-about">What’s this package <code>costsplitter</code> about?<a class="anchor" aria-label="anchor" href="#whats-this-package-costsplitter-about"></a>
+<img src="logo.png" class="logo" alt=""><h1 id="whats-costsplitter-about">What’s <code>costsplitter</code> about?<a class="anchor" aria-label="anchor" href="#whats-costsplitter-about"></a>
 </h1>
 </div>
 <p>The package <code>costsplitter</code> is an R package designed to simplify the task of splitting costs for group activities. While evenly dividing expenses among participants is straightforward in many situations, real-world scenarios often require a more nuanced approach. The package <code>costsplitter</code> addresses various factors that can complicate cost-sharing:</p>
@@ -80,32 +81,105 @@
 <span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"github.com/jakobschumacher/costsplitter"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="step-2-prepare-the-data">Step 2: Prepare the data<a class="anchor" aria-label="anchor" href="#step-2-prepare-the-data"></a>
+<h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
-<p><strong>Prepare the input files</strong>. This is the tricky part of the undertaking. You need to have your data in a correct format, otherwise the function will not work correctly. Use a spreadsheet that can also be helpful during the planning of the group activity. The data should conatin the following columns:</p>
-<blockquote>
-<p>The <code>name</code> column. This column indicates the names of the persons involved. This is a must have column otherwise the package will throw an error. The names must be unique.</p>
-</blockquote>
-<blockquote>
-<p>The <code>pay_</code> columns. These columns hold the amount that somebody paid for one activity. At least one <code>pay_</code> column must be available. Each <code>pay_</code>column must match with one <code>share_</code>column. This must be done by a corresponding part after the <code>_</code> e.g. <code>pay_breakfast</code>and <code>share_breakfast</code>. The value should be numeric. All <code>pay_</code> columns should either start with <code>pay_</code> or a string given by <code>var_pay</code>.</p>
-</blockquote>
-<blockquote>
-<p>The <code>share_</code>columns. These columns hold the share that everyone has to pay for the activity. The second part of the name after the <code>_</code> must correspond to one <code>pay_</code>column. The value can be numeric. It must be between 0 (meaning the person does not hove to pay) and 1 (meaning the person does have to pay a full share) or it can have one of the following categorical values <code>full</code>, <code>reduced</code>, <code>half</code> or <code>some</code>. These categorical values will be transformed to numerical values. The corresponding value can be controlled with the function arguments <code>value_full</code>, <code>value_reduced</code>, <code>value_half</code> or <code>value_some</code> respectively. NA values and empty values will be translated into 0. All <code>share_</code> columns should either start with <code>share_</code> or a string given by <code>var_share</code>.</p>
-</blockquote>
-<blockquote>
-<p>The <code>group</code> column. Several persons can be put together to form a group. This can be indicated in this column.</p>
-</blockquote>
-<blockquote>
-<p>The <code>age</code> column. This column indicates the age of the persons involved. The value should be an integer value between 0 and 120. The value could also be either <code>adult</code> or <code>kid</code>, that will be translated into 1 and 0.5 respectively. NA values and empty values will be translated into 1.</p>
-</blockquote>
-<blockquote>
-<p>The <code>adjustment</code> column. To give a general bonus or malus that will apply the complete amount somebody has to pay you can use the adjustment column. This column can be numeric between 0 (indicating the person does not have to pay) and 100 (indicating 100x times the normal share). The value can also be categorical with <code>more</code> indicating that the person should pay 1.2 times more and <code>less</code> indicating that the person should pay only 0.8 of the usual amount. NA values and empty values will be translated into 1.</p>
-</blockquote>
-<p>Here is an example of a suitable dataset. |name |group |age |cost_day1 | pay_day1|cost_day2 | pay_day2|adjustment | |:————–|:——-|:—–|:———|——–:|:———|——–:|:———-| |James Smith |Smith |adult |full | NA|full | NA|NA | |Olivia Johnson |Johnson |NA |0.8 | NA|full | NA|less | |Ethan Brown |Brown |3 |full | NA|full | NA|NA | |Amelia Taylor |Smith |adult |full | NA|full | 657|NA | |Lucas Wilson |Wilson |adult |NA | NA|NA | NA|NA | |Emma Davis |Smith |NA |full | 800|full | NA|NA |</p>
-<p>What this will do is: It reads in the files, checks if the files are structured in the right way, changes categorical values into numerical values, then it calculates a weight based on the age, adjustment and the grade of involvement. In the end it gives out the amount that everybody needs to pay and whom the money should be paid.</p>
+<p>A group of friends go on a hike for two days together with kids</p>
+<p>Here is an example of a suitable dataset.</p>
+<table class="table">
+<colgroup>
+<col width="19%">
+<col width="10%">
+<col width="7%">
+<col width="12%">
+<col width="11%">
+<col width="12%">
+<col width="11%">
+<col width="14%">
+</colgroup>
+<thead><tr class="header">
+<th align="left">name</th>
+<th align="left">group</th>
+<th align="left">age</th>
+<th align="left">cost_day1</th>
+<th align="right">pay_day1</th>
+<th align="left">cost_day2</th>
+<th align="right">pay_day2</th>
+<th align="left">adjustment</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">James Smith</td>
+<td align="left">Smith</td>
+<td align="left">adult</td>
+<td align="left">full</td>
+<td align="right">NA</td>
+<td align="left">full</td>
+<td align="right">NA</td>
+<td align="left">NA</td>
+</tr>
+<tr class="even">
+<td align="left">Olivia Johnson</td>
+<td align="left">Johnson</td>
+<td align="left">NA</td>
+<td align="left">0.8</td>
+<td align="right">NA</td>
+<td align="left">full</td>
+<td align="right">NA</td>
+<td align="left">less</td>
+</tr>
+<tr class="odd">
+<td align="left">Ethan Brown</td>
+<td align="left">Brown</td>
+<td align="left">3</td>
+<td align="left">full</td>
+<td align="right">NA</td>
+<td align="left">full</td>
+<td align="right">NA</td>
+<td align="left">NA</td>
+</tr>
+<tr class="even">
+<td align="left">Amelia Taylor</td>
+<td align="left">Smith</td>
+<td align="left">adult</td>
+<td align="left">full</td>
+<td align="right">NA</td>
+<td align="left">full</td>
+<td align="right">657</td>
+<td align="left">NA</td>
+</tr>
+<tr class="odd">
+<td align="left">Lucas Wilson</td>
+<td align="left">Wilson</td>
+<td align="left">adult</td>
+<td align="left">NA</td>
+<td align="right">NA</td>
+<td align="left">NA</td>
+<td align="right">NA</td>
+<td align="left">NA</td>
+</tr>
+<tr class="even">
+<td align="left">Emma Davis</td>
+<td align="left">Smith</td>
+<td align="left">NA</td>
+<td align="left">full</td>
+<td align="right">800</td>
+<td align="left">full</td>
+<td align="right">NA</td>
+<td align="left">NA</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
-  </main><aside class="col-md-3"><div class="license">
+  </main><aside class="col-md-3"><div class="links">
+<h2 data-toc-skip>Links</h2>
+<ul class="list-unstyled">
+<li><a href="https://github.com/jakobschumacher/costsplitter/" class="external-link">Browse source code</a></li>
+<li><a href="https://github.com/jakobschumacher/costsplitter/issues" class="external-link">Report a bug</a></li>
+</ul>
+</div>
+
+<div class="license">
 <h2 data-toc-skip>License</h2>
 <ul class="list-unstyled">
 <li><a href="LICENSE.html">Full license</a></li>
