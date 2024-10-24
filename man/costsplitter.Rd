@@ -8,13 +8,8 @@ costsplitter(df, pay_by = "group")
 }
 \arguments{
 \item{df}{A dataframe containing the cost data. The dataframe must have at least the following columns:
-\itemize{
-\item \code{name}: Name of the participant.
-\item \code{group}: Group identifier.
-\item \code{age}: Age of the participant.
-\item Columns starting with \code{"share"}: Columns indicating the share of costs.
-\item Columns for \code{adjustment} and \code{pay}: Columns indicating adjustments and payments.
-}}
+\code{name}, \code{group}, \code{age}, columns starting with \code{"share"} indicating the share of costs,
+and columns for \code{adjustment} and \code{pay} indicating adjustments and payments.}
 
 \item{pay_by}{A character string specifying whether the costs should be split by \code{"group"} (default) or \code{"individual"}.}
 }
@@ -38,5 +33,4 @@ df <- tibble::tibble(
   pay_tour = c(200, 100, 250)
 )
 costsplitter(df, pay_by = "group")
-
 }

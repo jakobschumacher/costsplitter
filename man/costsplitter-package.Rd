@@ -5,6 +5,8 @@
 \alias{costsplitter-package}
 \title{costsplitter: Divide Costs Fairly Amongst Friends}
 \description{
+\if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
+
 The package `costsplitter` is an R package designed to simplify the task of splitting costs for group activities.
 }
 \author{

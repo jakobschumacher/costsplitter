@@ -5,17 +5,11 @@
 #' age, share, and adjustments.
 #'
 #' @param df A dataframe containing the cost data. The dataframe must have at least the following columns:
-#' \itemize{
-#'   \item `name`: Name of the participant.
-#'   \item `group`: Group identifier.
-#'   \item `age`: Age of the participant.
-#'   \item Columns starting with `"share"`: Columns indicating the share of costs.
-#'   \item Columns for `adjustment` and `pay`: Columns indicating adjustments and payments.
-#' }
-#' @param pay_by A character string specifying whether the costs should be split by `"group"` (default) or `"individual"`.
+#' \code{name}, \code{group}, \code{age}, columns starting with \code{"share"} indicating the share of costs,
+#' and columns for \code{adjustment} and \code{pay} indicating adjustments and payments.
+#' @param pay_by A character string specifying whether the costs should be split by \code{"group"} (default) or \code{"individual"}.
 #' @return A dataframe with the total amount to pay per group or individual based on the specified criteria.
 #' @export
-#'
 #'
 #' @examples
 #' df <- tibble::tibble(
@@ -29,7 +23,6 @@
 #'   pay_tour = c(200, 100, 250)
 #' )
 #' costsplitter(df, pay_by = "group")
-#'
 costsplitter <- function(df, pay_by = "group"){
 
   data_clean <- df |>
