@@ -5,22 +5,28 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Divide costs fairly amongst friends • costsplitter</title>
+<title>Split costs fairly • costsplitter</title>
+<!-- favicons --><link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
+<link rel="apple-touch-icon" type="image/png" sizes="180x180" href="../apple-touch-icon.png">
+<link rel="apple-touch-icon" type="image/png" sizes="120x120" href="../apple-touch-icon-120x120.png">
+<link rel="apple-touch-icon" type="image/png" sizes="76x76" href="../apple-touch-icon-76x76.png">
+<link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png">
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Divide costs fairly amongst friends">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Split costs fairly">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
-    <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
+    <nav class="navbar navbar-expand-lg fixed-top bg-primary" data-bs-theme="dark" aria-label="Site navigation"><div class="container">
 
     <a class="navbar-brand me-2" href="../index.html">costsplitter</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,15 +39,15 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/divide-costs-fairly-amongst-friends.html">Divide costs fairly amongst friends</a></li>
+<li><a class="dropdown-item" href="../articles/divide-costs-fairly-amongst-friends.html">Split costs fairly</a></li>
   </ul>
 </li>
-<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
 </form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/jakobschumacher/costsplitter/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
 
@@ -54,91 +60,137 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-
-      <h1>Divide costs fairly amongst friends</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>Split costs fairly</h1>
             
       
-
+      <small class="dont-index">Source: <a href="https://github.com/jakobschumacher/costsplitter/blob/main/vignettes/divide-costs-fairly-amongst-friends.Rmd" class="external-link"><code>vignettes/divide-costs-fairly-amongst-friends.Rmd</code></a></small>
       <div class="d-none name"><code>divide-costs-fairly-amongst-friends.Rmd</code></div>
     </div>
 
     
     
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">costsplitter</span><span class="op">)</span></span></code></pre></div>
-<!-- WARNING - This vignette is generated by {fusen} from dev/flat_money_transfer.Rmd: do not edit by hand -->
+<p>You want to use split the costs of a group activity? Here are the
+recommended steps</p>
 <div class="section level2">
-<h2 id="this-is-the-documentation-of-all-functions-of-the-package">This is the documentation of all functions of the package<a class="anchor" aria-label="anchor" href="#this-is-the-documentation-of-all-functions-of-the-package"></a>
+<h2 id="step-1-think-about-whether-you-need-a-detailed-method-like-this">Step 1: Think about whether you need a detailed method like
+this<a class="anchor" aria-label="anchor" href="#step-1-think-about-whether-you-need-a-detailed-method-like-this"></a>
 </h2>
-<div class="section level3">
-<h3 id="function-to-check-the-costsplitter-data">Function to check the costsplitter data<a class="anchor" aria-label="anchor" href="#function-to-check-the-costsplitter-data"></a>
-</h3>
-<p>This is a helper function that reads in the data from the participant
-file</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Attaching package: 'dplyr'</span></span>
-<span><span class="co">#&gt; The following objects are masked from 'package:stats':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     filter, lag</span></span>
-<span><span class="co">#&gt; The following objects are masked from 'package:base':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     intersect, setdiff, setequal, union</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://stringr.tidyverse.org" class="external-link">stringr</a></span><span class="op">)</span></span>
-<span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Alice"</span>, <span class="st">"Bob"</span>, <span class="st">"Charlie"</span><span class="op">)</span>,</span>
-<span>  pay_breakfast <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">0</span>, <span class="fl">10</span><span class="op">)</span>,</span>
-<span>  share_breakfast <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="st">"half"</span>, <span class="st">"full"</span><span class="op">)</span>,</span>
-<span>  age <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">30</span>, <span class="st">"kid"</span>, <span class="cn">NA</span><span class="op">)</span>,</span>
-<span>  adjustment <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"more"</span>, <span class="cn">NA</span>, <span class="st">"less"</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="../reference/check_costsplitter_data.html">check_costsplitter_data</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span>
-<span><span class="co">#&gt;      name pay_breakfast share_breakfast  age adjustment</span></span>
-<span><span class="co">#&gt; 1   Alice            20               1   30       more</span></span>
-<span><span class="co">#&gt; 2     Bob             0            half  kid       &lt;NA&gt;</span></span>
-<span><span class="co">#&gt; 3 Charlie            10            full &lt;NA&gt;       less</span></span></code></pre></div>
+<p>This costsplitter method is as easy as i could make it. But there
+could still be easier methods.</p>
+<blockquote>
+<p>First alternative method would be to do it by hand. If you did all
+the activities together and want to split equally its very easy to
+calculate. Do a small table with four colums. First is the name column.
+Second is the pay column - there you write what everybody paid. Third
+column is the share-column the total amount of expenses (sum of the pay
+column) divided by the total number of persons. Fourth colum is the
+to-pay-column which is the pay-column minus the share-column. The
+to-pay-column should add up to 0. Then with a bit of thinking you can
+finde ways to say who pays to whom</p>
+</blockquote>
+<blockquote>
+<p>Second alternative method is to use a dedicated app or webpage. Have
+a look at <a href="https://www.kittysplit.com/" class="external-link">https://www.kittysplit.com/</a> and
+say hello to my Berlin fellow programmers</p>
+</blockquote>
+<p>The costsplitter package is something for you have more difficult
+situation:</p>
+<ul>
+<li>Partial participation (e.g., leaving early or joining late)</li>
+<li>Involvement in only select activities</li>
+<li>Unused reservations or no-shows</li>
+<li>Income disparities among group members</li>
+<li>Age-based consumption differences (e.g., children vs. adults)</li>
+</ul>
 </div>
-<div class="section level3">
-<h3 id="function-to-change-the-categorical-values-to-numerical-values">Function to change the categorical values to numerical values<a class="anchor" aria-label="anchor" href="#function-to-change-the-categorical-values-to-numerical-values"></a>
-</h3>
-<p>This is a helper function that is used in the check_costsplitter_data
-function. In the cost variables we accept categorical values. These
-categorical values need to be turned into numeric values</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">data_participants</span> <span class="op">=</span> <span class="fu"><a href="../reference/check_costsplitter_data.html">check_costsplitter_data</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/cat_to_num.html">cat_to_num</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<div class="section level2">
+<h2 id="step-2-prepare-the-data">Step 2: Prepare the data<a class="anchor" aria-label="anchor" href="#step-2-prepare-the-data"></a>
+</h2>
+<p><strong>Prepare the input files:</strong> This is the tricky part of
+the undertaking. You need to have your data in a correct format,
+otherwise the function will not work correctly. Use a spreadsheet that
+can also be helpful during the planning of the group activity. You can
+have a look at my <a href="https://docs.google.com/spreadsheets/d/1dtL-zcGSLeKAydzJiNuFTObo6JdNwtwjRM2sjQ0a1lI/edit?usp=sharing" class="external-link">example
+google-sheets-template</a> The data should contain the following
+columns:</p>
+<blockquote>
+<p>The <code>name</code> column. This column indicates the names of the
+persons involved. This is a must have column otherwise the package will
+throw an error. The names must be unique.</p>
+</blockquote>
+<blockquote>
+<p>The <code>pay_</code> columns. These columns hold the amount that
+somebody paid for one activity. At least one <code>pay_</code> column
+must be available. Each <code>pay_</code>column must match with one
+<code>share_</code>column. This must be done by a corresponding part
+after the <code>_</code> e.g. <code>pay_breakfast</code>and
+<code>share_breakfast</code>. The value should be numeric. All
+<code>pay_</code> columns should either start with <code>pay_</code>.
+The <code>share_</code>columns. These columns hold the share that
+everyone has to pay for the activity. The second part of the name after
+the <code>_</code> must correspond to one <code>pay_</code>column. The
+value can be numeric. It must be between 0 (meaning the person does not
+hove to pay) and 1 (meaning the person does have to pay a full share) or
+it can have one of the following categorical values <code>full</code>,
+<code>reduced</code>, <code>half</code> or <code>some</code>. These
+categorical values will be transformed to numerical values. NA values
+and empty values will be translated into 0. All <code>share_</code>
+columns should either start with <code>share_</code>.</p>
+</blockquote>
+<blockquote>
+<p>The <code>group</code> column. Several persons can be put together to
+form a group. This can be indicated in this column.</p>
+</blockquote>
+<blockquote>
+<p>The <code>age</code> column. This column indicates the age of the
+persons involved. The value should be an integer value between 0 and
+120. The value could also be either <code>adult</code> or
+<code>kid</code>, that will be translated into 1 and 0.5 respectively.
+NA values and empty values will be translated into 1.</p>
+</blockquote>
+<blockquote>
+<p>The <code>adjustment</code> column. To give a general bonus or malus
+that will apply the complete amount somebody has to pay you can use the
+adjustment column. This column can be numeric between 0 (indicating the
+person does not have to pay) and 100 (indicating 100x times the normal
+share). The value can also be categorical with <code>more</code>
+indicating that the person should pay 1.2 times more and
+<code>less</code> indicating that the person should pay only 0.8 of the
+usual amount. NA values and empty values will be translated into 1.</p>
+</blockquote>
 </div>
-<div class="section level3">
-<h3 id="function-to-minimize-payments-between-payers-and-recievers">Function to minimize payments between payers and recievers<a class="anchor" aria-label="anchor" href="#function-to-minimize-payments-between-payers-and-recievers"></a>
-</h3>
-<p>This is a helper function. Some people will recieve money and others
-will need to pay money. We need to match these payers and recievers. We
-do this and try to reduce the number of overall payments.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="section level2">
+<h2 id="step-3-do-the-analysis">Step 3: Do the analysis<a class="anchor" aria-label="anchor" href="#step-3-do-the-analysis"></a>
+</h2>
+<p>This is the easy part. If the input files are in structured in the
+right way, all you need to do is run:</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
-<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span></span>
-<span>  element <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Brown"</span>, <span class="st">"Smith"</span>, <span class="st">"Fisher"</span>, <span class="st">"Taylor"</span>, <span class="st">"Davis"</span>, <span class="st">"Johnson"</span>, <span class="st">"Wilson"</span>, <span class="st">"ORally"</span><span class="op">)</span>,</span>
-<span>  to_pay <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">995</span>, <span class="op">-</span><span class="fl">125</span>, <span class="op">-</span><span class="fl">80</span>,  <span class="fl">210</span>, <span class="fl">245</span>, <span class="fl">300</span>, <span class="fl">365</span>, <span class="fl">80</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
+<span><span class="co"># Load the package</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://jakobschumacher.github.io/costsplitter">costsplitter</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="../reference/minimize_payments.html">minimize_payments</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 3</span></span></span>
-<span><span class="co">#&gt;   payer   receiver amount</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ORally  Fisher       80</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Wilson  Brown       365</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Johnson Brown       300</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Davis   Brown       245</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> Taylor  Brown        85</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> Taylor  Smith       125</span></span></code></pre></div>
+<span><span class="co"># Read in the data</span></span>
+<span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">'your_data_set.csv'</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Do the analysis</span></span>
+<span><span class="fu"><a href="../reference/costsplitter.html">costsplitter</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span></code></pre></div>
+<p>What this will do is: It reads in the files, checks if the files are
+structured in the right way, changes categorical values into numerical
+values, then it calculates a weight based on the age, adjustment and the
+grade of involvement. In the end it gives out the amount that everybody
+needs to pay and whom the money should be paid.</p>
 </div>
-<div class="section level3">
-<h3 id="function-to-give-you-amount-each-has-to-pay">Function to give you amount each has to pay<a class="anchor" aria-label="anchor" href="#function-to-give-you-amount-each-has-to-pay"></a>
-</h3>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/costsplitter.html">costsplitter</a></span><span class="op">(</span>pay_by <span class="op">=</span> <span class="st">"group"</span><span class="op">)</span></span></code></pre></div>
-</div>
+<div class="section level2">
+<h2 id="step-4-communicate-your-findings">Step 4: Communicate your findings<a class="anchor" aria-label="anchor" href="#step-4-communicate-your-findings"></a>
+</h2>
+<p>You will receive a table that will look something like the table
+below. You can photograph this and send it to the others.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://jakobschumacher.github.io/costsplitter">costsplitter</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># data("valid_trip_data", package = "costsplitter")</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># costsplitter(valid_trip_data, pay_by = "individual")</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
